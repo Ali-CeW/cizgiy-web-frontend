@@ -1,0 +1,166 @@
+.admin-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+h1 {
+  color: #333;
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 32px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 15px;
+}
+
+.order-stats {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  width: 30%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  transition: transform 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+}
+
+.stat-card h3 {
+  color: #555;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+
+.stat-card p {
+  color: #333;
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0;
+}
+
+.orders-table-container {
+  overflow-x: auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.orders-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.orders-table th {
+  background-color: #f8f9fa;
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.orders-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #eee;
+  color: #555;
+}
+
+.orders-table tr:hover {
+  background-color: #f9f9f9;
+}
+
+.orders-table tr.approved {
+  background-color: rgba(76, 175, 80, 0.1);
+}
+
+.orders-table tr.pending {
+  background-color: rgba(255, 193, 7, 0.1);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.approve-btn, .reject-btn {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.approve-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.approve-btn:hover {
+  background-color: #3e8e41;
+}
+
+.reject-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.reject-btn:hover {
+  background-color: #d32f2f;
+}
+
+.status-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-approved {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.status-pending {
+  background-color: #FF9800;
+  color: white;
+}
+
+.loading, .error, .no-orders {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+}
+
+.error {
+  color: #f44336;
+}
+
+@media (max-width: 768px) {
+  .order-stats {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .stat-card {
+    width: 100%;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+  }
+  
+  .orders-table th, .orders-table td {
+    padding: 8px;
+    font-size: 14px;
+  }
+}

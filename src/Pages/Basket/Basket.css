@@ -1,0 +1,11 @@
+.sticky {
+  position: -webkit-sticky;
+  position: sticky;
+}
+
+@media (max-width: 768px) {
+  .sticky {
+    position: static;
+    margin-top: 1rem;
+  }
+}
