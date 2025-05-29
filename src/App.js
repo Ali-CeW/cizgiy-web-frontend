@@ -9,7 +9,12 @@ import Basket from './Pages/Basket/Basket';
 import AdminLogin from './Pages/Admin/AdminLogin';
 import AdminProducts from './Pages/Admin/AdminProducts';
 import AdminManage from './Pages/Admin/AdminManage';
-
+import AdminDiscounts from './Pages/Admin/AdminDiscounts';
+import AdminNotes from './Pages/Admin/AdminNotes';
+import Payment from './Pages/Payment/Payment';
+import Sucsess from './Pages/AfterPayPages/Sucsess';
+import NotFound from './Pages/AfterPayPages/NotFound';
+import PaymentError from './Pages/AfterPayPages/PaymentError';
 import './App.css';
 
 function App() {
@@ -27,6 +32,12 @@ function App() {
             <Route path="/Admin/Login" element={<AdminLogin />} />
             <Route path="/Admin/Products" element={<AdminProducts />} />
             <Route path="/Admin/Manage" element={<AdminManage />} />
+            <Route path="/Admin/Discounts" element={<AdminDiscounts />} />
+            <Route path="/Admin/Notes" element={<AdminNotes />} />
+            <Route path="/payment" element={<Payment />} />
+            <Route path="/payment/success" element={<Sucsess />} />
+            <Route path="/payment/error" element={<PaymentError />} />
+            <Route path="*" element={<NotFound />} />
             { /*
             <Route path="/Admin/Actions" element={<AdminActions />} />
             <Route path="/Galeri" element={<GaleriPage />} />

@@ -1,0 +1,154 @@
+.payment-result-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  padding: 3rem 1rem;
+  background-color: #f8f9fa;
+}
+
+.result-card {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 2.5rem;
+  transition: all 0.3s ease;
+  border: none;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.result-card:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
+}
+
+.icon-container {
+  width: 120px;
+  height: 120px;
+  border-radius: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 2rem;
+  animation: fadeIn 0.8s ease-out;
+}
+
+.success-icon-container {
+  background-color: rgba(40, 167, 69, 0.1);
+}
+
+.error-icon-container {
+  background-color: rgba(220, 53, 69, 0.1);
+}
+
+.warning-icon-container {
+  background-color: rgba(255, 193, 7, 0.1);
+}
+
+.result-icon {
+  font-size: 4rem;
+  animation: scaleIn 0.5s ease-out;
+}
+
+.result-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #343a40;
+}
+
+.result-message {
+  color: #6c757d;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 2rem;
+}
+
+.action-button {
+  padding: 0.7rem 1.8rem;
+  font-weight: 500;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  min-width: 150px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.04);
+}
+
+.primary-button {
+  background-color: #4e73df;
+  border-color: #4e73df;
+  color: white;
+}
+
+.primary-button:hover {
+  background-color: #3a5ecc;
+  border-color: #3a5ecc;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.secondary-button {
+  background-color: transparent;
+  border: 2px solid #4e73df;
+  color: #4e73df;
+}
+
+.secondary-button:hover {
+  background-color: rgba(78, 115, 223, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.05);
+}
+
+.tertiary-button {
+  background-color: transparent;
+  border: 2px solid #6c757d;
+  color: #6c757d;
+}
+
+.tertiary-button:hover {
+  background-color: rgba(108, 117, 125, 0.1);
+  transform: translateY(-2px);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .action-button {
+    width: 100%;
+  }
+  
+  .result-card {
+    padding: 2rem 1.5rem;
+  }
+}

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FaTrash, FaMinus, FaPlus, FaShoppingCart } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import './Basket.css';
 
 const Basket = () => {
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState(() => {
     try {
       const savedCart = localStorage.getItem('cart');
@@ -37,6 +39,18 @@ const Basket = () => {
 
   const needsMinimumQuantity = (item) => {
     return item.type.includes('Baskılı') && item.quantity < 5;
+  };
+
+  const handleCheckout = () => {
+    const invalidItems = cartItems.filter(item => needsMinimumQuantity(item));
+
+    if (invalidItems.length > 0) {
+      alert('Baskılı ürünlerde minimum 5 adet sipariş vermelisiniz.');
+      return;
+    }
+
+    const encodedCartItems = encodeURIComponent(JSON.stringify(cartItems));
+    navigate(`/payment?cart=${encodedCartItems}`);
   };
 
   return (
@@ -112,6 +126,8 @@ const Basket = () => {
               </div>
               <button 
                 className="bg-blue-600 text-white w-full py-3 rounded font-semibold hover:bg-blue-700 transition"
+                onClick={handleCheckout}
+                disabled={cartItems.length === 0}
               >
                 Sipariş Ver
               </button>

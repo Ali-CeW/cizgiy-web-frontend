@@ -12,11 +12,10 @@ const AdminLogin = () => {
 
   // Check if already logged in
   useEffect(() => {
-    localStorage.clear();
+    localStorage.clear(); // Clear sensitive data on logout
     const token = localStorage.getItem('token');
     const userType = localStorage.getItem('user_type');
-    
-    if (token) {
+    if (token && userType === 'Admin') {
       navigate('/Admin/Products');
     }
   }, [navigate]);
@@ -36,21 +35,17 @@ const AdminLogin = () => {
         `${process.env.REACT_APP_BACKEND_URL}/api/admin/login`,
         credentials
       );
-        console.log('Login response:', response.data);
-        console.log(process.env.REACT_APP_BACKEND_URL);
-        console.log(credentials);
 
-      if (response.data.token) {
-        // Store token and user type in localStorage
+      if (response.data?.token && response.data?.user_type === 'Admin') {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user_type', response.data.user_type);
         navigate('/Admin/Products');
       } else {
-        setError('Giriş yapılamadı. Lütfen tekrar deneyin.');
+        throw new Error('Invalid credentials.');
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || 'Giriş yapılamadı. Lütfen tekrar deneyin.');
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

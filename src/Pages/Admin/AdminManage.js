@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './AdminManage.css';
 
 const AdminManage = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,29 +12,33 @@ const AdminManage = () => {
 
   // Fetch all orders
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userType = localStorage.getItem('user_type');
+    if (!token || userType !== 'Admin') {
+      navigate('/');
+    }
+
     const fetchOrders = async () => {
       try {
         setLoading(true);
-        const token = localStorage.getItem('token'); // Token'ı localStorage'dan alın
         const response = await axios.get(
           `${process.env.REACT_APP_BACKEND_URL}/api/payment/kiyafetstatement`,
           {
             headers: {
-              Authorization: `Bearer ${token}`, // Token'ı Authorization başlığına ekleyin
-            },
+              Authorization: `Bearer ${token}`
+            }
           }
         );
-        console.log(response.status, response.statusText);
-        console.log('Fetched orders:', response.data);
+
         if (!response.data || !Array.isArray(response.data)) {
           throw new Error('Invalid data format received from server');
         }
         setOrders(response.data);
-        setLoading(false);
       } catch (err) {
-        setError('Siparişler yüklenirken bir hata oluştu.');
-        setLoading(false);
         console.error('Error fetching orders:', err);
+        setError('An error occurred while fetching orders.');
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -47,12 +52,23 @@ const AdminManage = () => {
   // Handle order approval
   const handleApprove = async (orderId) => {
     try {
-      await axios.put(`/api/orders/${orderId}/approve`, { urunonay: true });
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error('Unauthorized access.');
+
+      await axios.put(
+        `${process.env.REACT_APP_BACKEND_URL}/api/orders/${orderId}/approve`,
+        { urunonay: true },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
       setStatusUpdated(true);
-      alert('Sipariş onaylandı!');
+      alert('Order approved!');
     } catch (err) {
       console.error('Error approving order:', err);
-      alert('Sipariş onaylanırken bir hata oluştu.');
+      alert('An error occurred while approving the order.');
     }
   };
 
@@ -81,9 +97,12 @@ const AdminManage = () => {
   return (
     <div className="admin-container">
       {/* Admin Navigation */}
-      <div className="flex justify-end space-x-4 mb-6">
-        <Link to="/Admin/Products" className="text-blue-500 hover:underline">Ürün Yönetimi</Link>
-        <Link to="/Admin/Login" className="text-blue-500 hover:underline">Çıkış Yap</Link>
+      <div className="admin-nav mb-6">
+        <Link to="/Admin/Products" className="nav-item">Ürün Yönetimi</Link>
+        <Link to="/Admin/Manage" className="nav-item active">Sipariş Yönetimi</Link>
+        <Link to="/Admin/Discounts" className="nav-item">İndirim Yönetimi</Link>
+        <Link to="/Admin/Notes" className="nav-item">Not Yönetimi</Link>
+        <Link to="/Admin/Login" className="nav-item logout">Çıkış Yap</Link>
       </div>
       
       <h1>Sipariş Yönetimi</h1>

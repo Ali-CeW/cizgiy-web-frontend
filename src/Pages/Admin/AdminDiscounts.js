@@ -2,19 +2,17 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { FaEdit, FaTrash, FaPlus, FaCheck, FaTimes, FaSpinner } from 'react-icons/fa';
 import { Link, useNavigate } from 'react-router-dom';
-import './AdminProducts.css';
+import './AdminNotes.css'; // Reuse the same CSS
 
-const AdminProducts = () => {
+const AdminDiscounts = () => {
   const navigate = useNavigate();
   
   // State management
-  const [products, setProducts] = useState([]);
+  const [discounts, setDiscounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');
+  const [editingDiscount, setEditingDiscount] = useState(null);
   const [notification, setNotification] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   
@@ -22,9 +20,9 @@ const AdminProducts = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    price: '',
-    category: 'Tişört',
-    tshirtType: 'duz'
+    discountRate: '',
+    startDate: '',
+    endDate: ''
   });
 
   // Authentication check
@@ -36,22 +34,24 @@ const AdminProducts = () => {
     const userType = localStorage.getItem('user_type');
     
     if (!token || userType !== 'Admin') {
+      setError('Admin yetkilerine sahip değilsiniz. Lütfen giriş yapın.');
+      setLoading(false);
       navigate('/');
       return;
     }
     
     setIsAuthenticated(true);
-    fetchProducts();
+    fetchDiscounts();
   }, []);
 
-  // Fetch products from API
-  const fetchProducts = async () => {
+  // Fetch discounts from API
+  const fetchDiscounts = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
       
       const response = await axios.get(
-        `${process.env.REACT_APP_BACKEND_URL}/api/payment/admin/products`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/admin/discaunt`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -59,11 +59,11 @@ const AdminProducts = () => {
         }
       );
       
-      setProducts(response.data);
+      setDiscounts(response.data || []);
       setLoading(false);
     } catch (err) {
-      console.error('Error fetching products:', err);
-      setError('Ürünler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
+      console.error('Error fetching discounts:', err);
+      setError('İndirimler yüklenirken bir hata oluştu. Lütfen daha sonra tekrar deneyin.');
       setLoading(false);
     }
   };
@@ -91,54 +91,38 @@ const AdminProducts = () => {
     });
   };
 
-  // Handle image file selection
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImageFile(file);
-      
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   // Reset form to default values
   const resetForm = () => {
     setFormData({
       name: '',
       description: '',
-      price: '',
-      category: 'Tişört',
-      tshirtType: 'duz'
+      discountRate: '',
+      startDate: '',
+      endDate: ''
     });
-    setImageFile(null);
-    setImagePreview('');
-    setEditingProduct(null);
+    setEditingDiscount(null);
   };
 
-  // Open form for creating a new product
+  // Open form for creating a new discount
   const handleAddNew = () => {
     resetForm();
     setShowForm(true);
   };
 
-  // Open form for editing an existing product
-  const handleEdit = (product) => {
+  // Open form for editing an existing discount
+  const handleEdit = (discount) => {
+    // Format dates for the form
+    const startDate = discount.startDate ? new Date(discount.startDate).toISOString().split('T')[0] : '';
+    const endDate = discount.endDate ? new Date(discount.endDate).toISOString().split('T')[0] : '';
+
     setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-      tshirtType: product.tshirtType
+      name: discount.name,
+      description: discount.description,
+      discountRate: discount.discountRate,
+      startDate: startDate,
+      endDate: endDate
     });
-    setEditingProduct(product._id);
-    setImagePreview(product.imageUrl.startsWith('http') 
-      ? product.imageUrl 
-      : `${process.env.REACT_APP_BACKEND_URL}${product.imageUrl}`);
+    setEditingDiscount(discount._id);
     setShowForm(true);
   };
 
@@ -148,76 +132,80 @@ const AdminProducts = () => {
     resetForm();
   };
 
-  // Submit form to create or update a product
+  // Submit form to create or update a discount
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Unauthorized access.');
 
-      const data = new FormData();
-      data.append('name', sanitizeInput(formData.name));
-      data.append('description', sanitizeInput(formData.description));
-      data.append('price', sanitizeInput(formData.price));
-      data.append('category', sanitizeInput(formData.category));
-      data.append('tshirtType', sanitizeInput(formData.tshirtType));
-      if (imageFile) data.append('image', imageFile);
+      const sanitizedData = {
+        name: sanitizeInput(formData.name),
+        description: sanitizeInput(formData.description),
+        discountRate: sanitizeInput(formData.discountRate),
+        startDate: sanitizeInput(formData.startDate),
+        endDate: sanitizeInput(formData.endDate)
+      };
 
       let response;
-      if (editingProduct) {
+      if (editingDiscount) {
+        // Update existing discount
         response = await axios.put(
-          `${process.env.REACT_APP_BACKEND_URL}/api/payment/admin/products/${editingProduct}`,
-          data,
+          `${process.env.REACT_APP_BACKEND_URL}/api/admin/discaunt/${editingDiscount}`,
+          sanitizedData,
           {
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data'
+              'Authorization': `Bearer ${token}`
             }
           }
         );
+        showNotification('İndirim başarıyla güncellendi.');
       } else {
+        // Create new discount
         response = await axios.post(
-          `${process.env.REACT_APP_BACKEND_URL}/api/payment/admin/products`,
-          data,
+          `${process.env.REACT_APP_BACKEND_URL}/api/admin/discaunt`,
+          sanitizedData,
           {
             headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data'
+              'Authorization': `Bearer ${token}`
             }
           }
         );
+        showNotification('Yeni indirim başarıyla eklendi.');
       }
-      showNotification(response.data.message || 'Success.');
-      fetchProducts();
+      
+      // Refresh discount list
+      fetchDiscounts();
       setShowForm(false);
       resetForm();
     } catch (err) {
       console.error('Error:', err);
-      showNotification(err.response?.data?.error || 'An error occurred.', 'error');
+      showNotification(err.response?.data?.message || 'An error occurred.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  // Confirm product deletion
-  const handleDeleteConfirm = (productId) => {
-    setConfirmDelete(productId);
+  // Confirm discount deletion
+  const handleDeleteConfirm = (discountId) => {
+    setConfirmDelete(discountId);
   };
 
-  // Cancel product deletion
+  // Cancel discount deletion
   const handleDeleteCancel = () => {
     setConfirmDelete(null);
   };
 
-  // Delete a product
-  const handleDelete = async (productId) => {
+  // Delete a discount
+  const handleDelete = async (discountId) => {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
       
       await axios.delete(
-        `${process.env.REACT_APP_BACKEND_URL}/api/payment/admin/products/${productId}`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/admin/discaunt/${discountId}`,
         {
           headers: {
             'Authorization': `Bearer ${token}`
@@ -225,18 +213,25 @@ const AdminProducts = () => {
         }
       );
       
-      showNotification('Ürün başarıyla silindi.');
-      fetchProducts();
+      showNotification('İndirim başarıyla silindi.');
+      fetchDiscounts();
     } catch (err) {
-      console.error('Error deleting product:', err);
+      console.error('Error deleting discount:', err);
       showNotification(
-        err.response?.data?.error || 'Ürün silinirken bir hata oluştu.',
+        err.response?.data?.message || 'İndirim silinirken bir hata oluştu.',
         'error'
       );
     } finally {
       setLoading(false);
       setConfirmDelete(null);
     }
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('tr-TR');
   };
 
   if (!isAuthenticated && !loading) {
@@ -256,9 +251,9 @@ const AdminProducts = () => {
     <div className="container mx-auto px-4 py-8">
       {/* Admin Navigation */}
       <div className="admin-nav mb-6">
-        <Link to="/Admin/Products" className="nav-item active">Ürün Yönetimi</Link>
+        <Link to="/Admin/Products" className="nav-item">Ürün Yönetimi</Link>
         <Link to="/Admin/Manage" className="nav-item">Sipariş Yönetimi</Link>
-        <Link to="/Admin/Discounts" className="nav-item">İndirim Yönetimi</Link>
+        <Link to="/Admin/Discounts" className="nav-item active">İndirim Yönetimi</Link>
         <Link to="/Admin/Notes" className="nav-item">Not Yönetimi</Link>
         <Link to="/Admin/Login" className="nav-item logout">Çıkış Yap</Link>
       </div>
@@ -273,13 +268,13 @@ const AdminProducts = () => {
       )}
       
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Ürün Yönetimi</h1>
+        <h1 className="text-2xl font-bold">İndirim Yönetimi</h1>
         <button 
           onClick={handleAddNew}
           className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md flex items-center"
           disabled={loading}
         >
-          <FaPlus className="mr-2" /> Yeni Ürün Ekle
+          <FaPlus className="mr-2" /> Yeni İndirim Ekle
         </button>
       </div>
       
@@ -297,17 +292,17 @@ const AdminProducts = () => {
         </div>
       )}
       
-      {/* Product form */}
+      {/* Discount form */}
       {showForm && (
         <div className="bg-white p-6 rounded-lg shadow-md mb-8">
           <h2 className="text-xl font-bold mb-4">
-            {editingProduct ? 'Ürünü Düzenle' : 'Yeni Ürün Ekle'}
+            {editingDiscount ? 'İndirimi Düzenle' : 'Yeni İndirim Ekle'}
           </h2>
           
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Ürün Adı</label>
+                <label className="block text-sm font-medium mb-1">İndirim Adı</label>
                 <input
                   type="text"
                   name="name"
@@ -319,11 +314,25 @@ const AdminProducts = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-1">Fiyat</label>
+                <label className="block text-sm font-medium mb-1">İndirim Oranı (%)</label>
                 <input
-                  type="text"
-                  name="price"
-                  value={formData.price}
+                  type="number"
+                  name="discountRate"
+                  value={formData.discountRate}
+                  onChange={handleInputChange}
+                  className="w-full border border-gray-300 rounded-md px-3 py-2"
+                  min="1"
+                  max="100"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">Başlangıç Tarihi</label>
+                <input
+                  type="date"
+                  name="startDate"
+                  value={formData.startDate}
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 rounded-md px-3 py-2"
                   required
@@ -331,32 +340,15 @@ const AdminProducts = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-1">Kategori</label>
-                <select
-                  name="category"
-                  value={formData.category}
+                <label className="block text-sm font-medium mb-1">Bitiş Tarihi</label>
+                <input
+                  type="date"
+                  name="endDate"
+                  value={formData.endDate}
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 rounded-md px-3 py-2"
                   required
-                >
-                  <option value="Tişört">Tişört</option>
-                  <option value="Hoodie">Hoodie</option>
-                  <option value="Sweatshirt">Sweatshirt</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Ürün Tipi</label>
-                <select
-                  name="tshirtType"
-                  value={formData.tshirtType}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                  required
-                >
-                  <option value="duz">Düz</option>
-                  <option value="baskili">Baskılı</option>
-                </select>
+                />
               </div>
               
               <div className="md:col-span-2">
@@ -369,29 +361,6 @@ const AdminProducts = () => {
                   rows="3"
                   required
                 ></textarea>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">Ürün Görseli</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  {editingProduct && !imageFile ? "Resim değiştirmezseniz mevcut resim kullanılacaktır." : ""}
-                </p>
-              </div>
-              
-              <div className="flex items-center justify-center">
-                {imagePreview && (
-                  <img 
-                    src={imagePreview} 
-                    alt="Ürün önizleme" 
-                    className="max-h-40 max-w-full object-contain border rounded"
-                  />
-                )}
               </div>
             </div>
             
@@ -415,7 +384,7 @@ const AdminProducts = () => {
                   </>
                 ) : (
                   <>
-                    <FaCheck className="mr-2" /> {editingProduct ? 'Güncelle' : 'Kaydet'}
+                    <FaCheck className="mr-2" /> {editingDiscount ? 'Güncelle' : 'Kaydet'}
                   </>
                 )}
               </button>
@@ -424,43 +393,33 @@ const AdminProducts = () => {
         </div>
       )}
       
-      {/* Products table */}
-      {!loading && products.length > 0 && (
+      {/* Discounts table */}
+      {!loading && discounts.length > 0 && (
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-gray-100">
-                <th className="border px-4 py-2 text-left">Görsel</th>
-                <th className="border px-4 py-2 text-left">Ürün Adı</th>
-                <th className="border px-4 py-2 text-left">Kategori</th>
-                <th className="border px-4 py-2 text-left">Tip</th>
-                <th className="border px-4 py-2 text-left">Fiyat</th>
+                <th className="border px-4 py-2 text-left">İndirim Adı</th>
+                <th className="border px-4 py-2 text-left">Açıklama</th>
+                <th className="border px-4 py-2 text-center">İndirim Oranı</th>
+                <th className="border px-4 py-2 text-center">Başlangıç</th>
+                <th className="border px-4 py-2 text-center">Bitiş</th>
                 <th className="border px-4 py-2 text-center">İşlemler</th>
               </tr>
             </thead>
             <tbody>
-              {products.map((product) => (
-                <tr key={product._id} className="hover:bg-gray-50">
+              {discounts.map((discount) => (
+                <tr key={discount._id} className="hover:bg-gray-50">
+                  <td className="border px-4 py-2">{discount.name}</td>
+                  <td className="border px-4 py-2">{discount.description}</td>
+                  <td className="border px-4 py-2 text-center">%{discount.discountRate}</td>
+                  <td className="border px-4 py-2 text-center">{formatDate(discount.startDate)}</td>
+                  <td className="border px-4 py-2 text-center">{formatDate(discount.endDate)}</td>
                   <td className="border px-4 py-2">
-                    <img 
-                      src={product.imageUrl.startsWith('http') 
-                        ? product.imageUrl 
-                        : `${process.env.REACT_APP_BACKEND_URL}${product.imageUrl}`} 
-                      alt={product.name} 
-                      className="w-16 h-16 object-cover"
-                    />
-                  </td>
-                  <td className="border px-4 py-2">{product.name}</td>
-                  <td className="border px-4 py-2">{product.category}</td>
-                  <td className="border px-4 py-2">
-                    {product.tshirtType === 'duz' ? 'Düz' : 'Baskılı'}
-                  </td>
-                  <td className="border px-4 py-2">{product.price} TL</td>
-                  <td className="border px-4 py-2">
-                    {confirmDelete === product._id ? (
+                    {confirmDelete === discount._id ? (
                       <div className="flex justify-center space-x-2">
                         <button
-                          onClick={() => handleDelete(product._id)}
+                          onClick={() => handleDelete(discount._id)}
                           className="bg-red-500 hover:bg-red-600 text-white p-2 rounded"
                           title="Silmeyi Onayla"
                         >
@@ -477,14 +436,14 @@ const AdminProducts = () => {
                     ) : (
                       <div className="flex justify-center space-x-2">
                         <button
-                          onClick={() => handleEdit(product)}
+                          onClick={() => handleEdit(discount)}
                           className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded"
                           title="Düzenle"
                         >
                           <FaEdit />
                         </button>
                         <button
-                          onClick={() => handleDeleteConfirm(product._id)}
+                          onClick={() => handleDeleteConfirm(discount._id)}
                           className="bg-red-500 hover:bg-red-600 text-white p-2 rounded"
                           title="Sil"
                         >
@@ -501,14 +460,14 @@ const AdminProducts = () => {
       )}
       
       {/* Empty state */}
-      {!loading && products.length === 0 && (
+      {!loading && discounts.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-gray-500 mb-4">Henüz hiç ürün eklenmemiş.</p>
+          <p className="text-gray-500 mb-4">Henüz hiç indirim eklenmemiş.</p>
           <button 
             onClick={handleAddNew}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
           >
-            İlk Ürünü Ekle
+            İlk İndirimi Ekle
           </button>
         </div>
       )}
@@ -516,4 +475,4 @@ const AdminProducts = () => {
   );
 };
 
-export default AdminProducts;
+export default AdminDiscounts;
