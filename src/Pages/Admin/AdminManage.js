@@ -33,7 +33,19 @@ const AdminManage = () => {
         if (!response.data || !Array.isArray(response.data)) {
           throw new Error('Invalid data format received from server');
         }
-        setOrders(response.data);
+        setOrders(response.data.map(order => ({
+          merchantOid: order.merchantOid,
+          userEmail: order.userEmail,
+          userAdSoyad: order.userAdSoyad,
+          userAdres: order.userAdres,
+          userIl: order.userIl,
+          userIlce: order.userIlce,
+          userTelefon: order.userTelefon,
+          urunler: order.urunler,
+          finalPrice: order.finalPrice,
+          status: order.status,
+          createdAt: order.createdAt
+        })));
       } catch (err) {
         console.error('Error fetching orders:', err);
         setError('An error occurred while fetching orders.');
@@ -50,13 +62,13 @@ const AdminManage = () => {
   }, [statusUpdated]);
 
   // Handle order approval
-  const handleApprove = async (orderId) => {
+  const handleApprove = async (merchantOid) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Unauthorized access.');
 
       await axios.put(
-        `${process.env.REACT_APP_BACKEND_URL}/api/orders/${orderId}/approve`,
+        `${process.env.REACT_APP_BACKEND_URL}/api/admin/orders/${merchantOid}/approve`,
         { urunonay: true },
         {
           headers: {
@@ -73,9 +85,9 @@ const AdminManage = () => {
   };
 
   // Handle order rejection
-  const handleReject = async (orderId) => {
+  const handleReject = async (merchantOid) => {
     try {
-      await axios.put(`/api/orders/${orderId}/reject`, { urunonay: false });
+      await axios.put(`${process.env.REACT_APP_BACKEND_URL}/api/admin/${merchantOid}/reject`, { urunonay: false });
       setStatusUpdated(true);
       alert('Sipariş reddedildi!');
     } catch (err) {
@@ -144,17 +156,17 @@ const AdminManage = () => {
               </tr>
             ) : (
               orders.map((order) => (
-                <tr key={order._id} className={order.urunonay ? "approved" : "pending"}>
-                  <td>{order.UserAdSoyad}</td>
-                  <td>{order.UserEmail}</td>
-                  <td>{order.UserAdres}</td>
-                  <td>{order.Useril}/{order.Userilce}</td>
+                <tr key={order.merchantOid} className={order.urunonay ? "approved" : "pending"}>
+                  <td>{order.userAdSoyad}</td>
+                  <td>{order.userEmail}</td>
+                  <td>{order.userAdres}</td>
+                  <td>{order.userIl}/{order.userIlce}</td>
                   <td>{formatProducts(order.urunler)}</td>
-                  <td>{order.price} TL</td>
+                  <td>{order.finalPrice} TL</td>
                   <td>{order.kategori}</td>
                   <td>
-                    <span className={`status-badge ${order.urunonay ? "status-approved" : "status-pending"}`}>
-                      {order.urunonay ? "Onaylandı" : "Beklemede"}
+                    <span className={`status-badge ${order.status === 'completed' ? "status-approved" : "status-pending"}`}>
+                      {order.status === 'completed' ? "Onaylandı" : "Beklemede"}
                     </span>
                   </td>
                   <td className="action-buttons">
@@ -162,13 +174,13 @@ const AdminManage = () => {
                       <>
                         <button 
                           className="approve-btn" 
-                          onClick={() => handleApprove(order._id)}
+                          onClick={() => handleApprove(order.merchantOid)}
                         >
                           Onayla
                         </button>
                         <button 
                           className="reject-btn" 
-                          onClick={() => handleReject(order._id)}
+                          onClick={() => handleReject(order.merchantOid)}
                         >
                           Reddet
                         </button>
@@ -176,7 +188,7 @@ const AdminManage = () => {
                     ) : (
                       <button 
                         className="reject-btn" 
-                        onClick={() => handleReject(order._id)}
+                        onClick={() => handleReject(order.merchantOid)}
                       >
                         İptal Et
                       </button>
