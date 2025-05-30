@@ -96,10 +96,12 @@ const Payment = () => {
     
     const handleDiscountCode = async () => {
         if (!formData.discountCode) return;
-        
+
         try {
             setLoading(true);
-            const response = await axios.get(`/api/payment/DiscountQuery/${formData.discountCode}`);
+            const response = await axios.get(
+                `${process.env.REACT_APP_BACKEND_URL}/api/payment/DiscountQuery/${formData.discountCode}` // Confirmed endpoint
+            );
             setDiscount(response.data);
         } catch (err) {
             setError('Invalid discount code');
@@ -146,7 +148,10 @@ const Payment = () => {
             setLoading(true);
 
             const paymentData = {
-                cartItems,
+                cartItems: cartItems.map(item => ({
+                    id: item.productId,
+                    quantity: item.quantity
+                })),
                 userEmail: formData.userEmail,
                 userAdSoyad: formData.userAdSoyad,
                 userAdres: formData.userAdres,
@@ -158,10 +163,10 @@ const Payment = () => {
 
             const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/payment/initiate`, paymentData);
 
-            if (response.data.iframeUrl) {
+            if (response.data.status === 'success') {
                 document.getElementById('paytr-iframe-container').innerHTML = response.data.iframeContent;
             } else {
-                setError('Payment initialization failed');
+                setError(response.data.message || 'Payment initialization failed');
             }
         } catch (err) {
             setError('Error initializing payment');
