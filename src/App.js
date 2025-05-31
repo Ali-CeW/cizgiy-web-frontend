@@ -26,6 +26,8 @@ function App() {
         <Helmet>
           <title>Çizgiy - Tasarım Dünyası</title>
           <meta name="description" content="Çizgiy ile tasarım dünyasında çizginin ötesine geçin. Ürünlerimizle yaratıcılığı keşfedin." />
+          <meta property="og:image" content="/Cizgiy.png" />
+          <meta name="twitter:image" content="/Cizgiy.png" />
         </Helmet>
         <Navbar />
         <main className="flex-grow">

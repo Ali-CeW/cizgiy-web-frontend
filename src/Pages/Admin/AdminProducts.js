@@ -256,6 +256,9 @@ const AdminProducts = () => {
     <div className="container mx-auto px-4 py-8">
       {/* Admin Navigation */}
       <div className="admin-nav mb-6">
+        <div className="flex justify-center mb-6">
+          <img src={`${process.env.PUBLIC_URL}/images/Cizgiy.png`} alt="Çizgiy Logo" className="admin-logo" style={{ maxWidth: '150px', height: 'auto' }} />
+        </div>
         <Link to="/Admin/Products" className="nav-item active">Ürün Yönetimi</Link>
         <Link to="/Admin/Manage" className="nav-item">Sipariş Yönetimi</Link>
         <Link to="/Admin/Discounts" className="nav-item">İndirim Yönetimi</Link>

@@ -19,8 +19,7 @@ const Footer = () => {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <span className="footer-logo-text">Çizgiy</span>
-              <span className="footer-logo-dot">.</span>
+              <img src={`${process.env.PUBLIC_URL}/images/Cizgiy.png`} alt="Çizgiy Logo" className="footer-logo-image" />
             </motion.div>
             <p className="footer-description">
               Çizgiy, tasarım dünyasında çizgilerin ötesine geçerek, yaratıcılığı ve estetiği birleştiren öncü bir firmadır. Grafik tasarımdan web tasarımına, endüstriyel tasarımdan modaya kadar geniş bir yelpazede hizmet vermekteyiz.

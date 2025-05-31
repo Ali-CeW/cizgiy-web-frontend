@@ -22,7 +22,8 @@ const AdminDiscounts = () => {
     description: '',
     discountRate: '',
     startDate: '',
-    endDate: ''
+    endDate: '',
+    discountType: '' // Added discountType field
   });
 
   // Authentication check
@@ -32,7 +33,6 @@ const AdminDiscounts = () => {
     // Check if the user is logged in and is an admin
     const token = localStorage.getItem('token');
     const userType = localStorage.getItem('user_type');
-    
     if (!token || userType !== 'Admin') {
       setError('Admin yetkilerine sahip değilsiniz. Lütfen giriş yapın.');
       setLoading(false);
@@ -89,6 +89,10 @@ const AdminDiscounts = () => {
       ...formData,
       [name]: sanitizeInput(value)
     });
+    // Reset discountRate if discountType changes
+    if (name === 'discountType') {
+      setFormData((prev) => ({ ...prev, discountRate: '' }));
+    }
   };
 
   // Reset form to default values
@@ -98,7 +102,8 @@ const AdminDiscounts = () => {
       description: '',
       discountRate: '',
       startDate: '',
-      endDate: ''
+      endDate: '',
+      discountType: '' // Reset discountType field
     });
     setEditingDiscount(null);
   };
@@ -120,7 +125,8 @@ const AdminDiscounts = () => {
       description: discount.description,
       discountRate: discount.discountRate,
       startDate: startDate,
-      endDate: endDate
+      endDate: endDate,
+      discountType: discount.discountType || '' // Populate discountType field
     });
     setEditingDiscount(discount._id);
     setShowForm(true);
@@ -146,7 +152,8 @@ const AdminDiscounts = () => {
         description: sanitizeInput(formData.description),
         discountRate: sanitizeInput(formData.discountRate),
         startDate: sanitizeInput(formData.startDate),
-        endDate: sanitizeInput(formData.endDate)
+        endDate: sanitizeInput(formData.endDate),
+        discountType: sanitizeInput(formData.discountType) // Include discountType in submission
       };
 
       let response;
@@ -251,6 +258,9 @@ const AdminDiscounts = () => {
     <div className="container mx-auto px-4 py-8">
       {/* Admin Navigation */}
       <div className="admin-nav mb-6">
+        <div className="flex justify-center mb-6">
+          <img src={`${process.env.PUBLIC_URL}/images/Cizgiy.png`} alt="Çizgiy Logo" className="admin-logo" style={{ maxWidth: '150px', height: 'auto' }} />
+        </div>
         <Link to="/Admin/Products" className="nav-item">Ürün Yönetimi</Link>
         <Link to="/Admin/Manage" className="nav-item">Sipariş Yönetimi</Link>
         <Link to="/Admin/Discounts" className="nav-item active">İndirim Yönetimi</Link>
@@ -299,8 +309,9 @@ const AdminDiscounts = () => {
             {editingDiscount ? 'İndirimi Düzenle' : 'Yeni İndirim Ekle'}
           </h2>
           
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Discount Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium mb-1">İndirim Adı</label>
                 <input
@@ -312,21 +323,42 @@ const AdminDiscounts = () => {
                   required
                 />
               </div>
-              
               <div>
-                <label className="block text-sm font-medium mb-1">İndirim Oranı (%)</label>
-                <input
-                  type="number"
-                  name="discountRate"
-                  value={formData.discountRate}
+                <label className="block text-sm font-medium mb-1">İndirim Türü</label>
+                <select
+                  name="discountType"
+                  value={formData.discountType}
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 rounded-md px-3 py-2"
-                  min="1"
-                  max="100"
                   required
-                />
+                >
+                  <option value="">Seçiniz</option>
+                  <option value="percentage">Yüzde</option>
+                  <option value="fixed">Sabit</option>
+                </select>
               </div>
-              
+            </div>
+
+            {/* Discount Rate */}
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                {formData.discountType === 'percentage' ? 'İndirim Oranı (%)' : 'İndirim Tutarı'}
+              </label>
+              <input
+                type={formData.discountType === 'percentage' ? 'number' : 'text'}
+                name="discountRate"
+                value={formData.discountRate}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                min={formData.discountType === 'percentage' ? '1' : undefined}
+                max={formData.discountType === 'percentage' ? '100' : undefined}
+                disabled={!formData.discountType} // Disable if no discount type is selected
+                required
+              />
+            </div>
+
+            {/* Date Range */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium mb-1">Başlangıç Tarihi</label>
                 <input
@@ -338,7 +370,6 @@ const AdminDiscounts = () => {
                   required
                 />
               </div>
-              
               <div>
                 <label className="block text-sm font-medium mb-1">Bitiş Tarihi</label>
                 <input
@@ -350,21 +381,23 @@ const AdminDiscounts = () => {
                   required
                 />
               </div>
-              
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">Açıklama</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-md px-3 py-2"
-                  rows="3"
-                  required
-                ></textarea>
-              </div>
             </div>
-            
-            <div className="flex justify-end space-x-3 pt-4">
+
+            {/* Description */}
+            <div>
+              <label className="block text-sm font-medium mb-1">Açıklama</label>
+              <textarea
+                name="description"
+                value={formData.description}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2"
+                rows="3"
+                required
+              ></textarea>
+            </div>
+
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-3">
               <button
                 type="button"
                 onClick={handleCancel}
@@ -401,7 +434,8 @@ const AdminDiscounts = () => {
               <tr className="bg-gray-100">
                 <th className="border px-4 py-2 text-left">İndirim Adı</th>
                 <th className="border px-4 py-2 text-left">Açıklama</th>
-                <th className="border px-4 py-2 text-center">İndirim Oranı</th>
+                <th className="border px-4 py-2 text-center">İndirim Türü</th>
+                <th className="border px-4 py-2 text-center">{formData.discountType === 'percentage' ? 'İndirim Oranı (%)' : 'İndirim Tutarı'}</th>
                 <th className="border px-4 py-2 text-center">Başlangıç</th>
                 <th className="border px-4 py-2 text-center">Bitiş</th>
                 <th className="border px-4 py-2 text-center">İşlemler</th>
@@ -412,7 +446,8 @@ const AdminDiscounts = () => {
                 <tr key={discount._id} className="hover:bg-gray-50">
                   <td className="border px-4 py-2">{discount.name}</td>
                   <td className="border px-4 py-2">{discount.description}</td>
-                  <td className="border px-4 py-2 text-center">%{discount.discountRate}</td>
+                  <td className="border px-4 py-2">{discount.discountType === 'percentage' ? 'Yüzde' : 'Düz'}</td>
+                  <td className="border px-4 py-2 text-center">{discount.discountRate}</td>
                   <td className="border px-4 py-2 text-center">{formatDate(discount.startDate)}</td>
                   <td className="border px-4 py-2 text-center">{formatDate(discount.endDate)}</td>
                   <td className="border px-4 py-2">

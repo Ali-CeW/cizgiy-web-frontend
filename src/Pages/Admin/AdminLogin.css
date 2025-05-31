@@ -59,3 +59,8 @@
     margin-bottom: 10px;
     text-align: center;
 }
+
+.admin-logo {
+  max-width: 120px;
+  height: auto;
+}

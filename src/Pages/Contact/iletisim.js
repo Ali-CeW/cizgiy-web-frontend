@@ -43,6 +43,7 @@ const ContactPage = () => {
       {/* Hero Section */}
       <section className="contact-hero">
         <div className="contact-hero-content">
+          <img src={`${process.env.PUBLIC_URL}/images/Cizgiy.png`} alt="Çizgiy Logo" className="contact-hero-logo" />
           <motion.h1 
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}

@@ -71,6 +71,10 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 # Çizgiy Web Frontend
 
+## Logo
+
+The project now uses the official logo `Cizgiy.png` across the application for branding consistency.
+
 ## SEO Optimization
 
 This project includes advanced SEO optimizations:
@@ -78,6 +82,7 @@ This project includes advanced SEO optimizations:
 - Open Graph and Twitter Card tags for social media sharing.
 - Canonical links for better search engine indexing.
 - Dynamic `<title>` updates using `react-helmet`.
+- Logo integration for better visual identity.
 
 ## Features
 - Responsive design with Tailwind CSS.

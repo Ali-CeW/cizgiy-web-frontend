@@ -54,6 +54,9 @@ const AdminLogin = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <div className="flex justify-center mb-6">
+          <img src={`${process.env.PUBLIC_URL}/images/Cizgiy.png`} alt="Çizgiy Logo" className="admin-logo" style={{ maxWidth: '150px', height: 'auto' }} />
+        </div>
         <h1 className="text-2xl font-bold text-center mb-6">Admin Girişi</h1>
         
         {error && (

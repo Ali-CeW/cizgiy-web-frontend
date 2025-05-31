@@ -64,8 +64,7 @@ const Navbar = () => {
           transition={{ duration: 0.5 }}
         >
           <Link to="/" className="logo">
-            <span className="logo-text">Çizgiy</span>
-            <span className="logo-dot">.</span>
+            <img src={`${process.env.PUBLIC_URL}/images/Cizgiy.png`} alt="Çizgiy Logo" className="logo-image" />
           </Link>
           <div className="tagline">Çizginin Ötesinde Tasarım</div>
         </motion.div>
@@ -80,7 +79,6 @@ const Navbar = () => {
           >
             <NavLink to="/" label="Ana Sayfa" />
             <NavLink to="/Menu" label="Ürünler" />
-            <NavLink to="/Galeri" label="Galeri" />
             <NavLink to="/iletisim" label="İletişim" />
           </motion.div>
 
