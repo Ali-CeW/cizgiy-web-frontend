@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 import Navbar from './Pages/Navbar/Navbar';
 import Footer from './Pages/Footer/Footer';
 import Products from './Pages/Products/Products';
@@ -22,6 +23,10 @@ function App() {
   return (
     <Router>
       <div className="flex flex-col min-h-screen">
+        <Helmet>
+          <title>Çizgiy - Tasarım Dünyası</title>
+          <meta name="description" content="Çizgiy ile tasarım dünyasında çizginin ötesine geçin. Ürünlerimizle yaratıcılığı keşfedin." />
+        </Helmet>
         <Navbar />
         <main className="flex-grow">
           <Routes>

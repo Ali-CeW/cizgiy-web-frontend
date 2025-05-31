@@ -68,4 +68,19 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
-# cizgiy-web-frontend
+
+# Çizgiy Web Frontend
+
+## SEO Optimization
+
+This project includes advanced SEO optimizations:
+- Meta tags for description, keywords, and author.
+- Open Graph and Twitter Card tags for social media sharing.
+- Canonical links for better search engine indexing.
+- Dynamic `<title>` updates using `react-helmet`.
+
+## Features
+- Responsive design with Tailwind CSS.
+- Dynamic product listing and filtering.
+- Admin panel for managing products, orders, and discounts.
+- Integrated payment system with PayTR.
