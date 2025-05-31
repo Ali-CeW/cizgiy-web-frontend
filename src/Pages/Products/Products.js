@@ -177,10 +177,10 @@ const Products = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Custom notification */}
+      {/* Notification */}
       <AnimatePresence>
         {notification && (
-          <motion.div 
+          <motion.div
             className={`fixed top-4 right-4 z-50 p-4 rounded-md shadow-md ${
               notification.type === 'error' ? 'bg-red-500' : 'bg-green-500'
             } text-white`}
@@ -192,7 +192,7 @@ const Products = () => {
           </motion.div>
         )}
       </AnimatePresence>
-      
+
       {/* Cart indicator */}
       <div className="fixed top-4 right-4 z-10">
         <a href="/basket" className="bg-blue-500 text-white p-2 rounded-full flex items-center justify-center">

@@ -11,10 +11,11 @@ import AdminProducts from './Pages/Admin/AdminProducts';
 import AdminManage from './Pages/Admin/AdminManage';
 import AdminDiscounts from './Pages/Admin/AdminDiscounts';
 import AdminNotes from './Pages/Admin/AdminNotes';
+import AdminActions from './Pages/Admin/AdminActions';
 import Payment from './Pages/Payment/Payment';
 import Sucsess from './Pages/AfterPayPages/Sucsess';
-import NotFound from './Pages/AfterPayPages/NotFound';
 import PaymentError from './Pages/AfterPayPages/PaymentError';
+import NotFound from './Pages/AfterPayPages/NotFound';
 import './App.css';
 
 function App() {
@@ -28,20 +29,17 @@ function App() {
             <Route path="/Menu" element={<Products />} />
             <Route path="/iletisim" element={<ContactPage />} />
             <Route path="/CreateProd" element={<CreateProd />} />
-            <Route path='/Sepet' element={<Basket />} />
+            <Route path="/Sepet" element={<Basket />} />
             <Route path="/Admin/Login" element={<AdminLogin />} />
             <Route path="/Admin/Products" element={<AdminProducts />} />
             <Route path="/Admin/Manage" element={<AdminManage />} />
             <Route path="/Admin/Discounts" element={<AdminDiscounts />} />
             <Route path="/Admin/Notes" element={<AdminNotes />} />
+            <Route path="/Admin/Actions" element={<AdminActions />} />
             <Route path="/payment" element={<Payment />} />
             <Route path="/payment/success" element={<Sucsess />} />
             <Route path="/payment/error" element={<PaymentError />} />
             <Route path="*" element={<NotFound />} />
-            { /*
-            <Route path="/Admin/Actions" element={<AdminActions />} />
-            <Route path="/Galeri" element={<GaleriPage />} />
-            */}
           </Routes>
         </main>
         <Footer />
