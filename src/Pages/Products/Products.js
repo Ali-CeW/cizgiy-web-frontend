@@ -15,12 +15,14 @@ const Products = () => {
   const [orderPanelOpen, setOrderPanelOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [customImage, setCustomImage] = useState(null);
   const [customImagePreview, setCustomImagePreview] = useState(null);
   const [cart, setCart] = useState(() => {
     // Initialize cart from localStorage if available
     const savedCart = localStorage.getItem('cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
+  const [addedToCart, setAddedToCart] = useState(false);
   const [notification, setNotification] = useState(null);
   const fileInputRef = useRef(null);
 
@@ -103,6 +105,7 @@ const Products = () => {
     if (!product || typeof product !== 'object') return;
     setSelectedProduct(product);
     setQuantity(product.tshirtType === 'baskili' ? 5 : 1);
+    setCustomImage(null);
     setCustomImagePreview(null);
     setOrderPanelOpen(true);
   };
@@ -126,6 +129,7 @@ const Products = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
+        setCustomImage(file);
         setCustomImagePreview(reader.result);
       };
       reader.readAsDataURL(file);
@@ -173,10 +177,10 @@ const Products = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Notification */}
+      {/* Custom notification */}
       <AnimatePresence>
         {notification && (
-          <motion.div
+          <motion.div 
             className={`fixed top-4 right-4 z-50 p-4 rounded-md shadow-md ${
               notification.type === 'error' ? 'bg-red-500' : 'bg-green-500'
             } text-white`}
@@ -188,7 +192,7 @@ const Products = () => {
           </motion.div>
         )}
       </AnimatePresence>
-
+      
       {/* Cart indicator */}
       <div className="fixed top-4 right-4 z-10">
         <a href="/basket" className="bg-blue-500 text-white p-2 rounded-full flex items-center justify-center">
@@ -373,6 +377,7 @@ const Products = () => {
                           {customImagePreview && (
                             <button
                               onClick={() => {
+                                setCustomImage(null);
                                 setCustomImagePreview(null);
                               }}
                               className="text-red-500 hover:text-red-700"
