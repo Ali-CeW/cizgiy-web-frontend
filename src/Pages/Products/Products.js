@@ -348,7 +348,7 @@ const Products = () => {
                 onClick={(e) => e.stopPropagation()}
               >
                 <div className="order-panel-header">
-                  <h2 className="text-xl font-bold">Your Order</h2>
+                  <h2 className="text-xl font-bold">Siparişin</h2>
                   <button
                     onClick={() => setOrderPanelOpen(false)}
                     className="text-gray-500 hover:text-gray-800"
@@ -375,13 +375,14 @@ const Products = () => {
                       {/* Custom image upload for t-shirts */}
                       {selectedProduct.category.toLowerCase().includes('shirt') && (
                         <div className="mt-4">
-                          <p className="text-sm font-medium mb-2">Customize with your image:</p>
+                          <p className="text-sm font-medium mb-2">Resminle özelleştir:</p>
                           <div className="flex items-center">
                             <button
                               onClick={() => fileInputRef.current.click()}
-                              className="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg mr-3"
+                              className="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg mr-3 cursor-not-allowed"
+                              disabled={true}
                             >
-                              <FaUpload className="mr-2" /> Upload Image
+                              <FaUpload className="mr-2" /> Henüz aktif değil
                             </button>
                             <input
                               type="file"
@@ -413,7 +414,7 @@ const Products = () => {
                       
                       {/* Quantity selector */}
                       <div className="mb-6">
-                        <p className="text-sm font-medium mb-2">Quantity:</p>
+                        <p className="text-sm font-medium mb-2">Adet:</p>
                         <div className="flex items-center">
                           <button
                             onClick={() => handleQuantityChange(quantity - 1)}
@@ -436,22 +437,22 @@ const Products = () => {
                           </button>
                         </div>
                         {selectedProduct.tshirtType === 'baskili' && (
-                          <p className="text-xs text-red-500 mt-1">* Minimum order of 5 items for printed t-shirts</p>
+                          <p className="text-xs text-red-500 mt-1">* Baskılı tişörtlerimizde sipariş sayısı minimum 5 tir</p>
                         )}
                       </div>
                       
                       {/* Price calculation */}
                       <div className="mb-6">
                         <div className="flex justify-between text-sm mb-2">
-                          <span>Price per item:</span>
+                          <span>Tekli fiyat:</span>
                           <span>${selectedProduct.price}</span>
                         </div>
                         <div className="flex justify-between text-sm mb-2">
-                          <span>Quantity:</span>
+                          <span>Adet:</span>
                           <span>{quantity}</span>
                         </div>
                         <div className="flex justify-between font-bold text-lg">
-                          <span>Total:</span>
+                          <span>Toplam:</span>
                           <span>${calculateTotal()}</span>
                         </div>
                       </div>

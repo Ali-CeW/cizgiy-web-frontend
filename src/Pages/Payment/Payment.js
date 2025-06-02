@@ -39,10 +39,10 @@ const Payment = () => {
                     fetchProductDetails(parsedCart[0].productId);
                 }
             } catch {
-                setError('Invalid cart data');
+                setError('Sepet verisi geçersiz');
             }
         } else {
-            setError('Cart data is missing');
+            setError('Sepet verisi eksik');
         }
     }, [location]);
     
@@ -61,10 +61,10 @@ const Payment = () => {
             if (productData) {
                 setProduct(productData);
             } else {
-                setError('Product not found');
+                setError('Ürün bulunamadı');
             }
         } catch (err) {
-            setError('Error fetching product details');
+            setError('Ürün bilgisi alınırken hata oluştu');
             console.error(err);
         } finally {
             setLoading(false);
@@ -77,9 +77,9 @@ const Payment = () => {
         let price = product.price * quantity;
         
         if (discount && discount.discountType === 'percentage') {
-            price = price * (1 - discount.discountAmount / 100);
+            price = price * (1 - discount.discountRate / 100);
         } else if (discount && discount.discountType === 'fixed') {
-            price = price - discount.discountAmount;
+            price = price - discount.discountRate;
         }
         
         setTotalPrice(price);
@@ -104,7 +104,7 @@ const Payment = () => {
             );
             setDiscount(response.data);
         } catch (err) {
-            setError('Invalid discount code');
+            setError('Geçersiz indirim kodu');
             console.error(err);
             setDiscount(null);
         } finally {
@@ -115,11 +115,11 @@ const Payment = () => {
     const validateStep1 = () => {
         const { userEmail, userAdSoyad, userAdres, userIl, userIlce, userTelefon } = formData;
         if (!userEmail || !userAdSoyad || !userAdres || !userIl || !userIlce || !userTelefon) {
-            setError('Please fill all required fields');
+            setError('Lütfen tüm gerekli alanları doldurun');
             return false;
         }
         if (!userEmail.includes('@')) {
-            setError('Please enter a valid email');
+            setError('Lütfen geçerli bir e-posta adresi girin');
             return false;
         }
         setError('');
@@ -166,10 +166,10 @@ const Payment = () => {
             if (response.data.status === 'success') {
                 document.getElementById('paytr-iframe-container').innerHTML = response.data.iframeContent;
             } else {
-                setError(response.data.message || 'Payment initialization failed');
+                setError(response.data.message || 'Ödeme başlatılamadı');
             }
         } catch (err) {
-            setError('Error initializing payment');
+            setError('Ödeme başlatılırken hata oluştu');
             console.error(err);
         } finally {
             setLoading(false);
@@ -178,9 +178,9 @@ const Payment = () => {
     
     const renderStep1 = () => (
         <div className="payment-step">
-            <h2>Step 1: Customer Information</h2>
+            <h2>Adım 1: Müşteri Bilgileri</h2>
             <div className="form-group">
-                <label>Email</label>
+                <label>E-posta</label>
                 <input 
                     type="email" 
                     name="userEmail" 
@@ -190,7 +190,7 @@ const Payment = () => {
                 />
             </div>
             <div className="form-group">
-                <label>Name Surname</label>
+                <label>Ad Soyad</label>
                 <input 
                     type="text" 
                     name="userAdSoyad" 
@@ -200,7 +200,7 @@ const Payment = () => {
                 />
             </div>
             <div className="form-group">
-                <label>Address</label>
+                <label>Adres</label>
                 <textarea 
                     name="userAdres" 
                     value={formData.userAdres} 
@@ -210,7 +210,7 @@ const Payment = () => {
             </div>
             <div className="form-row">
                 <div className="form-group">
-                    <label>City</label>
+                    <label>İl</label>
                     <input 
                         type="text" 
                         name="userIl" 
@@ -220,7 +220,7 @@ const Payment = () => {
                     />
                 </div>
                 <div className="form-group">
-                    <label>District</label>
+                    <label>İlçe</label>
                     <input 
                         type="text" 
                         name="userIlce" 
@@ -231,7 +231,7 @@ const Payment = () => {
                 </div>
             </div>
             <div className="form-group">
-                <label>Phone</label>
+                <label>Telefon</label>
                 <input 
                     type="tel" 
                     name="userTelefon" 
@@ -240,13 +240,13 @@ const Payment = () => {
                     required 
                 />
             </div>
-            <button className="btn-next" onClick={handleNextStep}>Next</button>
+            <button className="btn-next" onClick={handleNextStep}>İleri</button>
         </div>
     );
     
     const renderStep2 = () => (
         <div className="payment-step">
-            <h2>Step 2: Order Review</h2>
+            <h2>Adım 2: Sipariş Özeti</h2>
             {product && (
                 <div className="order-summary">
                     <div className="product-details">
@@ -254,60 +254,66 @@ const Payment = () => {
                         <div>
                             <h3>{product.name}</h3>
                             <p>{product.description}</p>
-                            <p>Category: {product.category}</p>
-                            <p>Type: {product.tshirtType}</p>
+                            <p>Kategori: {product.category}</p>
+                            <p>Tür: {product.tshirtType}</p>
                             <div className="quantity-control">
                                 <button onClick={() => quantity > 1 && setQuantity(quantity - 1)}>-</button>
                                 <span>{quantity}</span>
                                 <button onClick={() => setQuantity(quantity + 1)}>+</button>
                             </div>
-                            <p>Price: ₺{product.price} x {quantity} = ₺{product.price * quantity}</p>
+                            <p>Fiyat: ₺{product.price} x {quantity} = ₺{product.price * quantity}</p>
                         </div>
+                    </div>
+                    <div className="shipping-section">
+                        <h3>Kargo Seçeneği</h3>
+                        <select name="shippingOption" value="Aras Kargo" disabled>
+                            <option value="Aras Kargo">Aras Kargo</option>
+                        </select>
                     </div>
                     <div className="discount-section">
                         <input 
                             type="text" 
                             name="discountCode" 
-                            placeholder="Discount Code" 
+                            placeholder="İndirim Kodu" 
                             value={formData.discountCode} 
                             onChange={handleInputChange} 
                         />
-                        <button onClick={handleDiscountCode}>Apply</button>
+                        <button onClick={handleDiscountCode}>Uygula</button>
                     </div>
                     {discount && (
                         <div className="discount-applied">
-                            <p>Discount Applied: {discount.name}</p>
+                            <p>Uygulanan İndirim: {discount.name}</p>
                             <p>
                                 {discount.discountType === 'percentage' 
-                                    ? `${discount.discountAmount}% off` 
-                                    : `₺${discount.discountAmount} off`}
+                                    ? `%${discount.discountRate} indirim` 
+                                    : `₺${discount.discountRate} indirim`}
                             </p>
                         </div>
                     )}
                     <div className="order-total">
-                        <h3>Total: ₺{totalPrice.toFixed(2)}</h3>
+                        <h3>Toplam: ₺{totalPrice.toFixed(2)}</h3>
                     </div>
                 </div>
             )}
             <div className="navigation-buttons">
-                <button className="btn-back" onClick={handlePreviousStep}>Back</button>
-                <button className="btn-next" onClick={handleNextStep}>Proceed to Payment</button>
+                <button className="btn-back" onClick={handlePreviousStep}>Geri</button>
+                <button className="btn-next" onClick={handleNextStep}>Ödemeye Geç</button>
             </div>
         </div>
     );
     
     const renderStep3 = () => (
         <div className="payment-step">
-            <h2>Step 3: Payment</h2>
+            <h2>Adım 3: Ödeme</h2>
             <div id="paytr-iframe-container" className="paytr-iframe"></div>
             <div className="navigation-buttons">
-                <button className="btn-back" onClick={handlePreviousStep}>Back</button>
+                <button className="btn-back" onClick={handlePreviousStep}>Geri</button>
             </div>
         </div>
     );
     
     if (loading) {
-        return <div className="loading">Loading...</div>;
+        return <div className="loading">Yükleniyor...</div>;
     }
     
     if (error) {
@@ -317,9 +323,9 @@ const Payment = () => {
     return (
         <div className="payment-container">
             <div className="payment-steps-indicator">
-                <div className={`step ${step >= 1 ? 'active' : ''}`}>Customer Info</div>
-                <div className={`step ${step >= 2 ? 'active' : ''}`}>Review Order</div>
-                <div className={`step ${step >= 3 ? 'active' : ''}`}>Payment</div>
+                <div className={`step ${step >= 1 ? 'active' : ''}`}>Müşteri Bilgileri</div>
+                <div className={`step ${step >= 2 ? 'active' : ''}`}>Sipariş Özeti</div>
+                <div className={`step ${step >= 3 ? 'active' : ''}`}>Ödeme</div>
             </div>
             
             {step === 1 && renderStep1()}

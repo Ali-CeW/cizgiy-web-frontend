@@ -14,8 +14,7 @@ const KargoBilgileri = () => {
             Kargo takip numarası, ürünleriniz kargoya verildikten sonra size e-posta yoluyla iletilecektir.</p>
             
             <h3>Kargo Ücreti</h3>
-            <p>100 TL ve üzeri alışverişlerinizde kargo ücretsizdir. 100 TL altındaki siparişlerde 
-            kargo ücreti 20 TL'dir.</p>
+            <p>1500 TL ve üzeri alışverişlerinizde kargo ücretsizdir. kargo ücreti standart olarak .</p>
             
             <h3>Teslimat Süresi</h3>
             <p>Ürünleriniz genellikle kargoya verildikten sonra 1-3 iş günü içerisinde teslim edilmektedir. 

@@ -317,3 +317,34 @@
     font-size: 14px;
   }
 }
+/* Shipping option styles */
+.shipping-section {
+  padding: 15px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  background-color: var(--secondary-color);
+}
+
+.shipping-section h3 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.shipping-section select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #fff;
+  color: var(--text-color);
+  cursor: not-allowed;
+}
+
+.shipping-section select:disabled {
+  background-color: var(--secondary-color);
+  color: var(--light-text);
+}
