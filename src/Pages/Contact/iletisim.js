@@ -130,8 +130,7 @@ const ContactPage = () => {
                   <FaMapMarkerAlt className="contact-icon" />
                   <div>
                     <h3>Adres</h3>
-                    <p>Tasarım Bulvarı No:42, Levent</p>
-                    <p>İstanbul, Türkiye</p>
+                    <p>İzmir Karşıyaka</p>
                   </div>
                 </div>
                 
@@ -139,8 +138,7 @@ const ContactPage = () => {
                   <FaPhone className="contact-icon" />
                   <div>
                     <h3>Telefon</h3>
-                    <p>+90 212 555 6789</p>
-                    <p>+90 533 123 4567</p>
+                    <p>+90 553 056 28 07</p>
                   </div>
                 </div>
                 
@@ -149,7 +147,7 @@ const ContactPage = () => {
                   <div>
                     <h3>E-posta</h3>
                     <p>info@cizgiy.com</p>
-                    <p>destek@cizgiy.com</p>
+                    <p>cizgiy@gmail.com</p>
                   </div>
                 </div>
                 
@@ -266,8 +264,8 @@ const ContactPage = () => {
           </div>
         </div>
       </section>
-
-      {/* Map Section */}
+              {/*
+      {/* Map Section 
       <section className="map-section">
         <div className="container">
           <motion.div 
@@ -278,7 +276,7 @@ const ContactPage = () => {
             transition={{ duration: 1 }}
           >
             <iframe 
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d48173.49490231267!2d28.97361287475371!3d41.06073705484423!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab63f6f8f8d65%3A0xd9e097ea0d423145!2sLevent%2C%20Be%C5%9Fikta%C5%9F%2F%C4%B0stanbul!5e0!3m2!1str!2str!4v1661086437071!5m2!1str!2str" 
+              src="https://www.google.com/maps/place/Teknik+Malzeme+İş+Merkezi/@38.4305171,27.1685789,17z/data=!3m1!4b1!4m6!3m5!1s0x14bbd87975b852bf:0x18637fb34c483b2e!8m2!3d38.4305171!4d27.1685789!16s%2Fg%2F11b7q4wms3?entry=ttu&g_ep=EgoyMDI1MDUyOC4wIKXMDSoASAFQAw%3D%3D" 
               width="100%" 
               height="450" 
               style={{ border: 0 }} 
@@ -290,7 +288,7 @@ const ContactPage = () => {
           </motion.div>
         </div>
       </section>
-
+      */}
       {/* Creative Slogan Banner */}
       <motion.section 
         className="slogan-banner"

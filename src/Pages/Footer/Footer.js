@@ -27,15 +27,17 @@ const Footer = () => {
             <div className="footer-contact">
               <div className="contact-item">
                 <FaMapMarkerAlt />
-                <span>Tasarım Bulvarı No:42, İstanbul</span>
+                <span>İzmir / Karşıyaka </span>
               </div>
               <div className="contact-item">
                 <FaPhone />
-                <span>+90 212 555 6789</span>
+                <span>+90 553 056 28 07</span>
               </div>
               <div className="contact-item">
                 <FaEnvelope />
                 <span>info@cizgiy.com</span>
+                <span>cizgiy@gmail.com</span>
+
               </div>
             </div>
           </div>
@@ -53,19 +55,19 @@ const Footer = () => {
             <div className="footer-links-column">
               <h3>Hizmetlerimiz</h3>
               <ul>
-                <li><Link to="/services/graphic-design">Grafik Tasarım</Link></li>
-                <li><Link to="/services/web-design">Web Tasarım</Link></li>
-                <li><Link to="/services/branding">Marka Kimliği</Link></li>
-                <li><Link to="/services/packaging">Ambalaj Tasarımı</Link></li>
+                <li><Link to="/hizmetler/grafik-tasarim">Grafik Tasarım</Link></li>
+                <li><Link to="/hizmetler/web-tasarim">Web Tasarım</Link></li>
+                <li><Link to="/hizmetler/marka-kimligi">Marka Kimliği</Link></li>
+                <li><Link to="/hizmetler/ambalaj-tasarimi">Ambalaj Tasarımı</Link></li>
               </ul>
             </div>
             <div className="footer-links-column">
               <h3>Destek</h3>
               <ul>
                 <li><Link to="/faq">Sıkça Sorulan Sorular</Link></li>
-                <li><Link to="/shipping">Kargo Bilgileri</Link></li>
-                <li><Link to="/returns">İade Politikası</Link></li>
-                <li><Link to="/privacy">Gizlilik Politikası</Link></li>
+                <li><Link to="/destek/kargo-bilgileri">Kargo Bilgileri</Link></li>
+                <li><Link to="/destek/iade-politikasi">İade Politikası</Link></li>
+                <li><Link to="/destek/gizlilik-politikasi">Gizlilik Politikası</Link></li>
               </ul>
             </div>
           </div>

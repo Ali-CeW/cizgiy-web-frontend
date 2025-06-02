@@ -17,6 +17,22 @@ import Payment from './Pages/Payment/Payment';
 import Sucsess from './Pages/AfterPayPages/Sucsess';
 import PaymentError from './Pages/AfterPayPages/PaymentError';
 import NotFound from './Pages/AfterPayPages/NotFound';
+
+// Main pages
+import Galeri from './Pages/Galeri/Galeri';
+import Faq from './Pages/Faq/Faq';
+
+// Hizmetler pages
+import GrafikTasarim from './Pages/Hizmetler/GrafikTasarim';
+import WebTasarim from './Pages/Hizmetler/WebTasarim';
+import MarkaKimligi from './Pages/Hizmetler/MarkaKimligi';
+import AmbalajTasarimi from './Pages/Hizmetler/AmbalajTasarimi';
+
+// Destek pages
+import KargoBilgileri from './Pages/Destek/KargoBilgileri';
+import IadePolitikasi from './Pages/Destek/IadePolitikasi';
+import GizlilikPolitikasi from './Pages/Destek/GizlilikPolitikasi';
+
 import './App.css';
 
 function App() {
@@ -34,7 +50,9 @@ function App() {
           <Routes>
             <Route path="/" element={<Products />} />
             <Route path="/Menu" element={<Products />} />
+            <Route path="/Galeri" element={<Galeri />} />
             <Route path="/iletisim" element={<ContactPage />} />
+            <Route path="/faq" element={<Faq />} />
             <Route path="/CreateProd" element={<CreateProd />} />
             <Route path="/Sepet" element={<Basket />} />
             <Route path="/Admin/Login" element={<AdminLogin />} />
@@ -46,6 +64,17 @@ function App() {
             <Route path="/payment" element={<Payment />} />
             <Route path="/payment/success" element={<Sucsess />} />
             <Route path="/payment/error" element={<PaymentError />} />
+            
+            {/* Hizmetler routes */}
+            <Route path="/hizmetler/grafik-tasarim" element={<GrafikTasarim />} />
+            <Route path="/hizmetler/web-tasarim" element={<WebTasarim />} />
+            <Route path="/hizmetler/marka-kimligi" element={<MarkaKimligi />} />
+            <Route path="/hizmetler/ambalaj-tasarimi" element={<AmbalajTasarimi />} />
+            
+            {/* Destek routes */}
+            <Route path="/destek/kargo-bilgileri" element={<KargoBilgileri />} />
+            <Route path="/destek/iade-politikasi" element={<IadePolitikasi />} />
+            <Route path="/destek/gizlilik-politikasi" element={<GizlilikPolitikasi />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

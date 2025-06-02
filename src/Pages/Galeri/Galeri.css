@@ -1,0 +1,24 @@
+.galeri-page {
+  padding: 50px 0;
+}
+
+.galeri-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.galeri-page h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.gallery-grid {
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  min-height: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

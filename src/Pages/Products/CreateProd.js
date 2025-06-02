@@ -77,13 +77,20 @@ const CreateProd = () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Check for supported image formats
+    const supportedFormats = ['image/png', 'image/jpeg', 'image/jpg'];
+    if (!supportedFormats.includes(file.type)) {
+      alert('Yalnızca PNG veya JPEG formatındaki resimleri yükleyebilirsiniz.');
+      return;
+    }
+
     setIsLoading(true);
 
     const reader = new FileReader();
     reader.onload = (f) => {
       try {
         const data = f.target.result;
-        FabricImage.fromURL(data, (img) => { // Use FabricImage instead of fabric.Image
+        FabricImage.fromURL(data, (img) => {
           // Resize image proportionally if too large
           const maxWidth = 200;
           const maxHeight = 200;
@@ -101,6 +108,7 @@ const CreateProd = () => {
           fabricCanvasRef.current.add(img);
           fabricCanvasRef.current.setActiveObject(img);
           fabricCanvasRef.current.renderAll();
+          updatePreview(); // Ensure preview updates after adding the image
           setIsLoading(false);
         }, { crossOrigin: 'anonymous' });
       } catch (error) {
@@ -125,22 +133,27 @@ const CreateProd = () => {
     // Clear preview canvas
     previewFabricRef.current.clear();
 
-    // Clone objects from main canvas to preview
-    fabricCanvasRef.current.getObjects().forEach((obj) => {
-      obj.clone((clone) => {
-        clone.set({
-          left: clone.left * (100 / 280),
-          top: clone.top * (120 / 350),
-          scaleX: clone.scaleX * (100 / 280),
-          scaleY: clone.scaleY * (120 / 350),
-          selectable: false,
-          evented: false,
-        });
-        previewFabricRef.current.add(clone);
-      });
+    // Convert main canvas to data URL and use it in preview
+    const dataURL = fabricCanvasRef.current.toDataURL({
+      format: 'png',
+      quality: 1,
     });
 
-    previewFabricRef.current.renderAll();
+    FabricImage.fromURL(dataURL, (img) => {
+      img.set({
+        left: previewFabricRef.current.width / 2,
+        top: previewFabricRef.current.height / 2,
+        originX: 'center',
+        originY: 'center',
+        scaleX: previewFabricRef.current.width / fabricCanvasRef.current.width,
+        scaleY: previewFabricRef.current.height / fabricCanvasRef.current.height,
+        selectable: false,
+        evented: false,
+      });
+
+      previewFabricRef.current.add(img);
+      previewFabricRef.current.renderAll();
+    });
   };
 
   // Handle keydown events (for delete key)
@@ -203,26 +216,88 @@ const CreateProd = () => {
     }
   }, [selectedFont, textColor, fontSize]);
   
-  // Save design (using html2canvas to capture the design with the t-shirt)
+  // Save design - actually captures the design
   const saveDesign = () => {
     if (isLoading) return;
     
     setIsLoading(true);
     
-    // This would be where you'd implement actual saving functionality
-    // For now, just show a loading state and then the alert
-    setTimeout(() => {
+    try {
+      // Create a temporary canvas to render the complete design
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = 500;
+      tempCanvas.height = 600;
+      const tempCtx = tempCanvas.getContext('2d');
+      
+      // Draw t-shirt background
+      const tshirtImg = new Image();
+      tshirtImg.onload = () => {
+        tempCtx.drawImage(tshirtImg, 0, 0, tempCanvas.width, tempCanvas.height);
+        
+        // Apply t-shirt color if not black
+        if (tshirtColor !== '#000000') {
+          tempCtx.globalCompositeOperation = 'source-in';
+          tempCtx.fillStyle = tshirtColor;
+          tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+          tempCtx.globalCompositeOperation = 'source-over';
+        }
+        
+        // Draw the design from fabric canvas
+        const designDataUrl = fabricCanvasRef.current.toDataURL({
+          format: 'png',
+          quality: 1
+        });
+        
+        const designImg = new Image();
+        designImg.onload = () => {
+          // Position design on shirt
+          const designWidth = tempCanvas.width * 0.65;
+          const designHeight = tempCanvas.height * 0.45;
+          const designX = (tempCanvas.width - designWidth) / 2;
+          const designY = tempCanvas.height * 0.25;
+          
+          tempCtx.drawImage(designImg, designX, designY, designWidth, designHeight);
+          
+          // Convert to data URL and prompt download
+          const dataUrl = tempCanvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.download = 'cizgiy-tshirt-design.png';
+          link.href = dataUrl;
+          link.click();
+          
+          setIsLoading(false);
+        };
+        
+        designImg.src = designDataUrl;
+      };
+      
+      tshirtImg.onerror = () => {
+        setIsLoading(false);
+        alert('T-shirt görüntüsü yüklenirken hata oluştu.');
+      };
+      
+      tshirtImg.src = tshirtImage;
+    } catch (error) {
+      console.error('Design saving error:', error);
       setIsLoading(false);
-      alert('Tasarım kaydetme işlevi yakında eklenecektir!');
-    }, 500);
+      alert('Tasarım kaydedilirken bir hata oluştu.');
+    }
   };
-  
-  // Place order (placeholder function)
+
+  // Place order function with basic validation
   const placeOrder = () => {
     if (isLoading) return;
-    alert('Sipariş verme işlevi yakında aktif olacaktır!');
+    
+    // Check if canvas has any objects
+    if (fabricCanvasRef.current && fabricCanvasRef.current.getObjects().length === 0) {
+      alert('Lütfen sipariş vermeden önce bir tasarım oluşturun.');
+      return;
+    }
+    
+    // Here you would implement the actual order processing
+    alert('Siparişiniz alındı! Gerçek bir uygulamada burada ödeme işlemine yönlendirilecektiniz.');
   };
-  
+
   // Set the CSS variable for the t-shirt image
   useEffect(() => {
     // Set the CSS variable for the t-shirt image
@@ -364,37 +439,44 @@ const CreateProd = () => {
           <button
             onClick={saveDesign}
             disabled={isLoading}
-            className="mt-6 bg-green-500 text-white py-3 px-6 rounded-lg text-lg font-semibold hover:bg-green-600 transition shadow-md w-full max-w-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="mt-6 bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? "İşleniyor..." : "💾 Tasarımı Kaydet"}
+            {isLoading ? 'Kaydediliyor...' : 'Taslağı Kaydet'}
           </button>
         </div>
         
-        {/* Preview area - always show the preview of the design */}
+        {/* Preview area - always show the preview section */}
         <div className="w-full md:w-1/4 bg-gray-100 p-4 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Önizleme</h2>
-          <div className="flex justify-center items-center h-32 mb-4">
-            <canvas ref={previewCanvasRef} className="border border-gray-300 rounded-md" />
+          <div className="flex justify-center items-center h-full">
+            <div className="relative w-full h-full">
+              <canvas ref={previewCanvasRef} className="border border-gray-300 rounded-md" />
+              
+              {/* Loading spinner */}
+              {isLoading && (
+                <div className="absolute inset-0 flex justify-center items-center bg-white bg-opacity-75 rounded-md">
+                  <svg className="animate-spin h-8 w-8 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v16a8 8 0 01-8-8z"></path>
+                  </svg>
+                </div>
+              )}
+            </div>
           </div>
-          
+        </div>
+      </div>
+      
+      {/* Order button - always visible at the bottom */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white py-4 shadow-md">
+        <div className="container mx-auto px-4">
           <button
             onClick={placeOrder}
             disabled={isLoading}
-            className="w-full bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-red-500 text-white py-3 px-4 rounded-md hover:bg-red-600 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Siparişi Tamamla
           </button>
         </div>
-      </div>
-      
-      {/* Footer note */}
-      <div className="mt-8 text-center text-sm text-gray-500">
-        <p>
-          Tasarımınızı kaydetmek veya sipariş vermek için yukarıdaki butonları kullanın.
-        </p>
-        <p>
-          Tüm hakları saklıdır. Cizgiy 2023
-        </p>
       </div>
     </div>
   );

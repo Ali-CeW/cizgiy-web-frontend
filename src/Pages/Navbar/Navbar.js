@@ -131,7 +131,7 @@ const Navbar = () => {
           >
             <div className="mobile-links">
               <Link to="/" className="mobile-link">Ana Sayfa</Link>
-              <Link to="/Menu" className="mobile-link">Ürünler</Link>
+              <Link to="/Pro" className="mobile-link">Ürünler</Link>
               <Link to="/Galeri" className="mobile-link">Galeri</Link>
               <Link to="/iletisim" className="mobile-link">İletişim</Link>
               

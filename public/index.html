@@ -1,55 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/Cizgiy.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Çizgiy - Tasarım dünyasında çizginin ötesine geçin. Ürünlerimizle yaratıcılığı keşfedin."
-    />
-    <meta
-      name="keywords"
-      content="Çizgiy, tasarım, tişört, hoodie, grafik tasarım, web tasarım, moda, endüstriyel tasarım"
-    />
-    <meta name="author" content="Çizgiy Team" />
-    <meta property="og:title" content="Çizgiy - Ürünler" />
-    <meta
-      property="og:description"
-      content="Çizgiy ile tasarım dünyasında çizginin ötesine geçin. Ürünlerimizle yaratıcılığı keşfedin."
-    />
-    <meta property="og:image" content="%PUBLIC_URL%/Cizgiy.png" />
-    <meta property="og:url" content="https://www.cizgiy.com" />
+    <meta name="theme-color" content="#4a90e2" />
+    
+    <!-- Primary Meta Tags -->
+    <title>Çizgiy - Tasarım Dünyasında Çizginin Ötesine Geçin</title>
+    <meta name="title" content="Çizgiy - Tasarım Dünyasında Çizginin Ötesine Geçin" />
+    <meta name="description" content="Türkiye'nin öncü tasarım markası Çizgiy ile yaratıcı ürünler keşfedin. Baskılı t-shirtler, hoodie'ler ve özel tasarım ürünler şimdi online mağazamızda." />
+    <meta name="keywords" content="Çizgiy, tasarım, tişört, hoodie, grafik tasarım, web tasarım, moda, endüstriyel tasarım, özel baskı, türk tasarım, Türkiye, giyim, custom t-shirt, fashion design" />
+    <meta name="author" content="Çizgiy Tasarım" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:locale" content="tr_TR" />
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Çizgiy" />
+    <meta property="og:title" content="Çizgiy - Tasarım Dünyasında Çizginin Ötesine Geçin" />
+    <meta property="og:description" content="Türkiye'nin öncü tasarım markası Çizgiy ile yaratıcı ürünler keşfedin. Baskılı t-shirtler, hoodie'ler ve özel tasarım ürünler şimdi online mağazamızda." />
+    <meta property="og:url" content="https://www.cizgiy.com/" />
+    <meta property="og:image" content="https://www.cizgiy.com/images/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Çizgiy - Ürünler" />
-    <meta
-      name="twitter:description"
-      content="Çizgiy ile tasarım dünyasında çizginin ötesine geçin. Ürünlerimizle yaratıcılığı keşfedin."
-    />
-    <meta name="twitter:image" content="%PUBLIC_URL%/Cizgiy.png" />
-    <link rel="canonical" href="https://www.cizgiy.com" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
+    <meta name="twitter:site" content="@cizgiy" />
+    <meta name="twitter:title" content="Çizgiy - Tasarım Dünyasında Çizginin Ötesine Geçin" />
+    <meta name="twitter:description" content="Türkiye'nin öncü tasarım markası Çizgiy ile yaratıcı ürünler keşfedin. Baskılı t-shirtler, hoodie'ler ve özel tasarım ürünler şimdi online mağazamızda." />
+    <meta name="twitter:image" content="https://www.cizgiy.com/images/twitter-image.jpg" />
+    
+    <!-- Canonical and language alternates -->
+    <link rel="canonical" href="https://www.cizgiy.com/" />
+    <link rel="alternate" hreflang="tr" href="https://www.cizgiy.com/" />
+    <link rel="alternate" hreflang="en" href="https://www.cizgiy.com/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://www.cizgiy.com/" />
+    
+    <!-- Structured Data for Organization -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Çizgiy",
+      "url": "https://www.cizgiy.com",
+      "logo": "https://www.cizgiy.com/images/Cizgiy.png",
+      "description": "Türkiye'nin öncü tasarım markası. Grafik tasarımdan web tasarımına, endüstriyel tasarımdan modaya.",
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "telephone": "+90-212-555-6789",
+        "contactType": "customer service",
+        "availableLanguage": ["Turkish", "English"]
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Tasarım Bulvarı No:42",
+        "addressLocality": "İstanbul",
+        "addressRegion": "İstanbul",
+        "postalCode": "34000",
+        "addressCountry": "TR"
+      },
+      "sameAs": [
+        "https://www.facebook.com/cizgiy",
+        "https://www.instagram.com/cizgiy",
+        "https://twitter.com/cizgiy",
+        "https://www.linkedin.com/company/cizgiy"
+      ]
+    }
+    </script>
+    
+    <!-- Structured Data for WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "url": "https://www.cizgiy.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://www.cizgiy.com/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+    
+    <!-- Manifest and additional meta tags -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/Cizgiy-192.png" />
+    <meta name="geo.region" content="TR" />
+    <meta name="geo.placename" content="İstanbul" />
+    
     <!-- Add Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>Çizgiy - Ürünler</title>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <noscript>Bu web sitesini görüntülemek için JavaScript'i etkinleştirmeniz gerekmektedir. / You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <!--
       This HTML file is a template.

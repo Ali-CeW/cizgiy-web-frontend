@@ -77,12 +77,12 @@ The project now uses the official logo `Cizgiy.png` across the application for b
 
 ## SEO Optimization
 
-This project includes advanced SEO optimizations:
-- Meta tags for description, keywords, and author.
+This project includes advanced SEO optimizations for both Turkey and international audiences:
+- Meta tags for description, keywords, and author tailored for global reach.
 - Open Graph and Twitter Card tags for social media sharing.
 - Canonical links for better search engine indexing.
-- Dynamic `<title>` updates using `react-helmet`.
-- Logo integration for better visual identity.
+- Structured data using JSON-LD for enhanced visibility in search results.
+- Robots.txt and sitemap integration for search engine crawlers.
 
 ## Features
 - Responsive design with Tailwind CSS.
