@@ -150,7 +150,8 @@ const Payment = () => {
             const paymentData = {
                 cartItems: cartItems.map(item => ({
                     id: item.productId,
-                    quantity: item.quantity
+                    quantity: item.quantity,
+                    size: item.size || 'Belirtilmemiş'
                 })),
                 userEmail: formData.userEmail,
                 userAdSoyad: formData.userAdSoyad,
@@ -158,7 +159,7 @@ const Payment = () => {
                 userIl: formData.userIl,
                 userIlce: formData.userIlce,
                 userTelefon: formData.userTelefon,
-                discountCode: discount ? formData.discountCode : null
+                discountCode: discount ? formData.discountCode : null,
             };
 
             const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/payment/initiate`, paymentData);
@@ -250,7 +251,8 @@ const Payment = () => {
             {product && (
                 <div className="order-summary">
                     <div className="product-details">
-                        <img src={product.imageUrl} alt={product.name} />
+                        {/* Display only the first image from the imageUrl array */}
+                        <img src={product.images[0]?.imgUrl} alt={product.name} />
                         <div>
                             <h3>{product.name}</h3>
                             <p>{product.description}</p>
