@@ -256,6 +256,9 @@ const Payment = () => {
                             <p>{product.description}</p>
                             <p>Kategori: {product.category}</p>
                             <p>Tür: {product.tshirtType}</p>
+                            {cartItems[0].size && (
+                              <p>Beden: {cartItems[0].size}</p>
+                            )}
                             <div className="quantity-control">
                                 <button onClick={() => quantity > 1 && setQuantity(quantity - 1)}>-</button>
                                 <span>{quantity}</span>

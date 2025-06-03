@@ -85,6 +85,11 @@ const Basket = () => {
                       </button>
                     </div>
                     <p className="text-gray-600 mb-2">{item.type}</p>
+                    {item.size && (
+                      <p className="text-gray-600 mb-2">
+                        <span className="font-medium">Beden:</span> {item.size}
+                      </p>
+                    )}
                     <div className="flex items-center mb-4">
                       <button 
                         onClick={() => updateQuantity(item.id, -1)}

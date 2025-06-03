@@ -152,3 +152,101 @@ button:active:not(:disabled) {
     background-color: rgba(239, 68, 68, 0.7);
   }
 }
+
+/* Size management styles */
+.size-management {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.size-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.size-inputs {
+  display: flex;
+  flex: 1;
+  gap: 10px;
+}
+
+.size-input, .stock-input {
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  transition: border-color 0.2s;
+}
+
+.size-input {
+  flex: 1;
+}
+
+.stock-input {
+  width: 100px;
+}
+
+.size-input:focus, .stock-input:focus {
+  border-color: #3182ce;
+  outline: none;
+  box-shadow: 0 0 0 1px rgba(49, 130, 206, 0.5);
+}
+
+.remove-size-btn {
+  background-color: #f56565;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.remove-size-btn:hover:not(:disabled) {
+  background-color: #e53e3e;
+}
+
+.remove-size-btn:disabled {
+  background-color: #cbd5e0;
+  cursor: not-allowed;
+}
+
+.add-size-btn {
+  background-color: #48bb78;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  align-self: flex-start;
+}
+
+.add-size-btn:hover {
+  background-color: #38a169;
+}
+
+/* Size badges in table */
+.size-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.size-badge {
+  background-color: #edf2f7;
+  color: #2d3748;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  display: inline-block;
+}

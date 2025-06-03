@@ -16,6 +16,7 @@ const Products = () => {
   const [orderPanelOpen, setOrderPanelOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [selectedSize, setSelectedSize] = useState(''); // Add state for selected size
   const [customImage, setCustomImage] = useState(null);
   const [customImagePreview, setCustomImagePreview] = useState(null);
   const [cart, setCart] = useState(() => {
@@ -25,6 +26,7 @@ const Products = () => {
   });
   const [addedToCart, setAddedToCart] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [lightboxImage, setLightboxImage] = useState(null);
   const fileInputRef = useRef(null);
 
   // Save cart to localStorage whenever it changes
@@ -51,15 +53,18 @@ const Products = () => {
         
         // Map the backend data to match our expected format
         const formattedProducts = response.data.map(product => ({
-          _id: product._id || product.uniqueId,
+          _id: product.uniqueId,
           name: product.name,
           description: product.description,
           price: product.price.toString(),
-          imageUrl: product.imageUrl ,
-          category: product.category ,
-          tshirtType: product.tshirtType
+          imageUrl: product.images.length > 0 ? product.images.sort((a, b) => a.imgNumber - b.imgNumber)[0]?.imgUrl : '', // Use the first image based on imgNumber
+          category: product.category || 'Unknown',
+          tshirtType: product.tshirtType || 'duz',
+          images: product.images.sort((a, b) => a.imgNumber - b.imgNumber), // Sort images by imgNumber
+          tshirtSize: product.tshirtSize || [] // Add this line to include size data
         }));
         
+        console.log("Products with sizes:", formattedProducts); // Add this for debugging
         setProducts(formattedProducts);
         setFilteredProducts(formattedProducts);
         setLoading(false);
@@ -108,6 +113,16 @@ const Products = () => {
     setQuantity(product.tshirtType === 'baskili' ? 5 : 1);
     setCustomImage(null);
     setCustomImagePreview(null);
+    
+    // Set default selected size if available
+    if (product.tshirtSize && Array.isArray(product.tshirtSize) && product.tshirtSize.length > 0) {
+      // Find first size that has stock
+      const availableSize = product.tshirtSize.find(size => parseInt(size.stock) > 0);
+      setSelectedSize(availableSize ? availableSize.size : '');
+    } else {
+      setSelectedSize('');
+    }
+    
     setOrderPanelOpen(true);
   };
 
@@ -143,34 +158,64 @@ const Products = () => {
     return (parseFloat(selectedProduct.price) * quantity).toFixed(2);
   };
 
+  // Handle size selection
+  const handleSizeSelect = (size) => {
+    setSelectedSize(size);
+  };
+
+  // Check if a size is in stock
+  const isSizeInStock = (sizeItem) => {
+    return parseInt(sizeItem.stock) > 0;
+  };
+
   // Add to cart function
   const addToCart = () => {
     if (!selectedProduct) return;
+    
+    // Validate size selection
+    if (selectedProduct.tshirtSize && Array.isArray(selectedProduct.tshirtSize) && 
+        selectedProduct.tshirtSize.length > 0 && !selectedSize) {
+      showNotification('Lütfen bir beden seçiniz', 'error');
+      return;
+    }
+
+    // Validate minimum quantity for printed products
+    if (selectedProduct.tshirtType === 'baskili' && quantity < 5) {
+      showNotification('Baskılı ürünlerde minimum sipariş adedi 5\'tir', 'error');
+      return;
+    }
 
     const sanitizedProduct = {
-        ...selectedProduct,
-        name: sanitizeInput(selectedProduct.name),
-        type: sanitizeInput(selectedProduct.type),
+      ...selectedProduct,
+      name: sanitizeInput(selectedProduct.name),
+      type: sanitizeInput(selectedProduct.type),
     };
 
     const cartItem = {
-        id: `${sanitizedProduct._id}_${Date.now()}`,
-        productId: sanitizedProduct._id,
-        name: sanitizedProduct.name,
-        type: sanitizedProduct.category,
-        productType: sanitizedProduct.tshirtType,
-        price: parseFloat(sanitizedProduct.price),
-        quantity: quantity,
-        image: sanitizedProduct.imageUrl,
-        customImage: customImagePreview,
-        totalPrice: parseFloat(sanitizedProduct.price) * quantity,
+      id: `${sanitizedProduct._id}_${Date.now()}`,
+      productId: sanitizedProduct._id,
+      name: sanitizedProduct.name,
+      type: sanitizedProduct.category,
+      productType: sanitizedProduct.tshirtType,
+      size: selectedSize,
+      price: parseFloat(sanitizedProduct.price),
+      quantity: quantity,
+      image: sanitizedProduct.imageUrl || (sanitizedProduct.images && sanitizedProduct.images.length > 0 ? sanitizedProduct.images[0].imgUrl : ''),
+      customImage: customImagePreview,
+      totalPrice: parseFloat(sanitizedProduct.price) * quantity,
     };
-
+    
     setCart(prevCart => [...prevCart, cartItem]);
+    setAddedToCart(true);
+    setOrderPanelOpen(false);
     showNotification('Ürün sepete eklendi!');
-    setTimeout(() => {
-        setOrderPanelOpen(false);
-    }, 1500);
+    
+    // Reset selections
+    setSelectedProduct(null);
+    setQuantity(1);
+    setSelectedSize('');
+    setCustomImage(null);
+    setCustomImagePreview(null);
   };
   
   // Get unique categories for filter
@@ -181,6 +226,16 @@ const Products = () => {
     { hrefLang: 'tr', href: '/Menu' },
     { hrefLang: 'en', href: '/en/products' }
   ];
+
+  // Handle image click to open lightbox
+  const openLightbox = (imageUrl) => {
+    setLightboxImage(imageUrl);
+  };
+
+  // Close lightbox
+  const closeLightbox = () => {
+    setLightboxImage(null);
+  };
 
   return (
     <>
@@ -286,13 +341,13 @@ const Products = () => {
                     {/* Front side */}
                     <div className="product-card-front">
                       <img
-                        src={product.imageUrl}
+                        src={product.images[0]?.imgUrl || product.imageUrl}
                         alt={product.name}
                         className="w-full h-full object-cover rounded-lg"
                       />
                       <div className="product-card-overlay">
                         <h3 className="text-xl font-semibold">{product.name}</h3>
-                        <p className="text-lg font-bold">${product.price}</p>
+                        <p className="text-lg font-bold">₺{product.price}</p>
                       </div>
                     </div>
                     
@@ -306,16 +361,16 @@ const Products = () => {
                         </span>
                         {product.tshirtType && (
                           <span className="ml-2 bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                            {product.tshirtType === 'duz' ? 'Plain' : 'Printed'}
+                            {product.tshirtType === 'duz' ? 'Düz' : 'Baskılı'}
                           </span>
                         )}
                       </div>
-                      <p className="text-lg font-bold mb-4">${product.price}</p>
+                      <p className="text-lg font-bold mb-4">₺{product.price}</p>
                       <button
                         onClick={() => handleOrderClick(product)}
                         className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg transition-colors duration-300"
                       >
-                        Sipariş Ver
+                        Detaylar ve Sipariş
                       </button>
                     </div>
                   </div>
@@ -323,7 +378,7 @@ const Products = () => {
               ))
             ) : (
               <div className="col-span-full text-center py-10">
-                <p className="text-gray-500 text-lg">No products found. Try a different search or filter.</p>
+                <p className="text-gray-500 text-lg">Hiç ürün bulunamadı. Farklı bir arama veya filtre deneyin.</p>
               </div>
             )}
           </div>
@@ -358,125 +413,155 @@ const Products = () => {
                 </div>
                 
                 <div className="order-panel-content">
-                  <div className="flex flex-col md:flex-row gap-6">
-                    {/* Product preview */}
-                    <div className="flex-1">
-                      <div className="product-preview">
-                        <img src={selectedProduct.imageUrl} alt={selectedProduct.name} className="w-full h-auto" />
+                  <div className="image-carousel">
+                    {selectedProduct.images.map((image, index) => (
+                      <div key={index} className="carousel-item" onClick={() => openLightbox(image.imgUrl)}>
+                        <img
+                          src={image.imgUrl}
+                          alt={`Resim ${index + 1}`}
+                          className="w-full h-auto rounded-lg"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="order-details">
+                    <h3 className="text-xl font-semibold mb-2">{selectedProduct.name}</h3>
+                    <p className="text-gray-600 mb-4">{selectedProduct.description}</p>
+                    
+                    {/* Size selector - Update this section to show stock numbers */}
+                    {selectedProduct.tshirtSize && Array.isArray(selectedProduct.tshirtSize) && selectedProduct.tshirtSize.length > 0 && (
+                      <div className="mb-6">
+                        <p className="text-sm font-medium mb-2">Beden:</p>
+                        <div className="size-selector">
+                          {selectedProduct.tshirtSize.map((sizeItem, index) => (
+                            <button
+                              key={index}
+                              className={`size-option ${selectedSize === sizeItem.size ? 'selected' : ''} ${!isSizeInStock(sizeItem) ? 'out-of-stock' : ''}`}
+                              onClick={() => isSizeInStock(sizeItem) && handleSizeSelect(sizeItem.size)}
+                              disabled={!isSizeInStock(sizeItem)}
+                              title={!isSizeInStock(sizeItem) ? 'Stokta yok' : `${sizeItem.size} - Stok: ${sizeItem.stock}`}
+                            >
+                              <span className="size-label">{sizeItem.size}</span>
+                              <span className="stock-indicator">
+                                {isSizeInStock(sizeItem) ? (
+                                  <span className="stock-count">{sizeItem.stock}</span>
+                                ) : (
+                                  <span className="out-of-stock-indicator">×</span>
+                                )}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
                         
-                        {/* Custom image overlay for t-shirts */}
-                        {selectedProduct.category.toLowerCase().includes('shirt') && customImagePreview && (
-                          <div className="custom-image-overlay">
-                            <img src={customImagePreview} alt="Custom design" />
+                        {/* Display selected size stock information */}
+                        {selectedSize && (
+                          <div className="selected-size-info">
+                            <p className="text-sm mt-2">
+                              <span className="font-medium">Seçilen Beden: </span> 
+                              {selectedSize} - Stok: 
+                              <span className="stock-number">
+                                {selectedProduct.tshirtSize.find(item => item.size === selectedSize)?.stock || 0}
+                              </span>
+                            </p>
                           </div>
                         )}
                       </div>
-                      
-                      {/* Custom image upload for t-shirts */}
-                      {selectedProduct.category.toLowerCase().includes('shirt') && (
-                        <div className="mt-4">
-                          <p className="text-sm font-medium mb-2">Resminle özelleştir:</p>
-                          <div className="flex items-center">
-                            <button
-                              onClick={() => fileInputRef.current.click()}
-                              className="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-lg mr-3 cursor-not-allowed"
-                              disabled={true}
-                            >
-                              <FaUpload className="mr-2" /> Henüz aktif değil
-                            </button>
-                            <input
-                              type="file"
-                              ref={fileInputRef}
-                              onChange={handleImageUpload}
-                              accept="image/*"
-                              className="hidden"
-                            />
-                            {customImagePreview && (
-                              <button
-                                onClick={() => {
-                                  setCustomImage(null);
-                                  setCustomImagePreview(null);
-                                }}
-                                className="text-red-500 hover:text-red-700"
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </div>
-                        </div>
+                    )}
+                    
+                    {/* Quantity selector */}
+                    <div className="mb-6">
+                      <p className="text-sm font-medium mb-2">Adet:</p>
+                      <div className="flex items-center">
+                        <button
+                          onClick={() => handleQuantityChange(quantity - 1)}
+                          className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-10 w-10 rounded-l-lg flex items-center justify-center"
+                        >
+                          <FaMinus />
+                        </button>
+                        <input
+                          type="number"
+                          min={selectedProduct.tshirtType === 'baskili' ? 5 : 1}
+                          value={quantity}
+                          onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
+                          className="h-10 w-16 border-t border-b text-center"
+                        />
+                        <button
+                          onClick={() => handleQuantityChange(quantity + 1)}
+                          className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-10 w-10 rounded-r-lg flex items-center justify-center"
+                        >
+                          <FaPlus />
+                        </button>
+                      </div>
+                      {selectedProduct.tshirtType === 'baskili' && (
+                        <p className="text-xs text-red-500 mt-1">* Baskılı tişörtlerimizde sipariş sayısı minimum 5'tir</p>
                       )}
                     </div>
                     
-                    {/* Order details */}
-                    <div className="flex-1">
-                      <h3 className="text-xl font-semibold mb-2">{selectedProduct.name}</h3>
-                      <p className="text-gray-600 mb-4">{selectedProduct.description}</p>
-                      
-                      {/* Quantity selector */}
-                      <div className="mb-6">
-                        <p className="text-sm font-medium mb-2">Adet:</p>
-                        <div className="flex items-center">
-                          <button
-                            onClick={() => handleQuantityChange(quantity - 1)}
-                            className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-10 w-10 rounded-l-lg flex items-center justify-center"
-                          >
-                            <FaMinus />
-                          </button>
-                          <input
-                            type="number"
-                            min={selectedProduct.tshirtType === 'baskili' ? 5 : 1}
-                            value={quantity}
-                            onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
-                            className="h-10 w-16 border-t border-b text-center"
-                          />
-                          <button
-                            onClick={() => handleQuantityChange(quantity + 1)}
-                            className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-10 w-10 rounded-r-lg flex items-center justify-center"
-                          >
-                            <FaPlus />
-                          </button>
-                        </div>
-                        {selectedProduct.tshirtType === 'baskili' && (
-                          <p className="text-xs text-red-500 mt-1">* Baskılı tişörtlerimizde sipariş sayısı minimum 5 tir</p>
-                        )}
+                    {/* Price calculation */}
+                    <div className="mb-6">
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Tekli fiyat:</span>
+                        <span>₺{selectedProduct.price}</span>
                       </div>
-                      
-                      {/* Price calculation */}
-                      <div className="mb-6">
-                        <div className="flex justify-between text-sm mb-2">
-                          <span>Tekli fiyat:</span>
-                          <span>${selectedProduct.price}</span>
-                        </div>
-                        <div className="flex justify-between text-sm mb-2">
-                          <span>Adet:</span>
-                          <span>{quantity}</span>
-                        </div>
-                        <div className="flex justify-between font-bold text-lg">
-                          <span>Toplam:</span>
-                          <span>${calculateTotal()}</span>
-                        </div>
+                      <div className="flex justify-between text-sm mb-2">
+                        <span>Adet:</span>
+                        <span>{quantity}</span>
                       </div>
-                      
-                      {/* Order button */}
-                      <button 
-                        onClick={addToCart}
-                        className={`w-full py-3 rounded-lg transition-colors duration-300 flex items-center justify-center
-                          ${addedToCart ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'} text-white`}
-                        disabled={addedToCart}
-                      >
-                        {addedToCart ? (
-                          <>
-                            <FaCheck className="mr-2" /> Sepete Eklendi
-                          </>
-                        ) : (
-                          <>
-                            <FaShoppingCart className="mr-2" /> Sepete Ekle
-                          </>
-                        )}
-                      </button>
+                      <div className="flex justify-between font-bold text-lg">
+                        <span>Toplam:</span>
+                        <span>₺{calculateTotal()}</span>
+                      </div>
                     </div>
+                    
+                    {/* Order button */}
+                    <button 
+                      onClick={addToCart}
+                      className={`w-full py-3 rounded-lg transition-colors duration-300 flex items-center justify-center
+                        ${addedToCart ? 'bg-green-500 hover:bg-green-600' : 'bg-blue-500 hover:bg-blue-600'} text-white`}
+                      disabled={addedToCart}
+                    >
+                      {addedToCart ? (
+                        <>
+                          <FaCheck className="mr-2" /> Sepete Eklendi
+                        </>
+                      ) : (
+                        <>
+                          <FaShoppingCart className="mr-2" /> Sepete Ekle
+                        </>
+                      )}
+                    </button>
                   </div>
                 </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Image Lightbox */}
+        <AnimatePresence>
+          {lightboxImage && (
+            <motion.div 
+              className="lightbox-backdrop"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeLightbox}
+            >
+              <motion.div 
+                className="lightbox-content"
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.8 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <button 
+                  className="lightbox-close"
+                  onClick={closeLightbox}
+                >
+                  <FaTimes />
+                </button>
+                <img src={lightboxImage} alt="Ürün Görseli" className="lightbox-image" />
               </motion.div>
             </motion.div>
           )}

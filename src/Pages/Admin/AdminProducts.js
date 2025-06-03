@@ -27,6 +27,9 @@ const AdminProducts = () => {
     tshirtType: 'duz'
   });
 
+  // Add state for sizes and stock
+  const [sizes, setSizes] = useState([{ size: 'S', stock: '0' }]);
+
   // Authentication check
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -106,6 +109,23 @@ const AdminProducts = () => {
     }
   };
 
+  // Handle multiple image file selection
+  const handleImagesChange = (e) => {
+    const files = Array.from(e.target.files);
+    const previews = files.map(file => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        return new Promise(resolve => {
+            reader.onloadend = () => resolve(reader.result);
+        });
+    });
+
+    Promise.all(previews).then(previews => {
+        setImageFile(files);
+        setImagePreview(previews);
+    });
+};
+
   // Reset form to default values
   const resetForm = () => {
     setFormData({
@@ -115,8 +135,9 @@ const AdminProducts = () => {
       category: 'Tişört',
       tshirtType: 'duz'
     });
-    setImageFile(null);
-    setImagePreview('');
+    setImageFile([]);
+    setImagePreview([]);
+    setSizes([{ size: 'S', stock: '0' }]);
     setEditingProduct(null);
   };
 
@@ -135,10 +156,21 @@ const AdminProducts = () => {
       category: product.category,
       tshirtType: product.tshirtType
     });
+    
+    // Set sizes if available, otherwise use default
+    setSizes(Array.isArray(product.tshirtSize) ? product.tshirtSize : [{ size: 'S', stock: '0' }]);
+    
     setEditingProduct(product._id);
-    setImagePreview(product.imageUrl.startsWith('http') 
-      ? product.imageUrl 
-      : `${process.env.REACT_APP_BACKEND_URL}${product.imageUrl}`);
+    
+    // Handle images preview
+    if (product.images && product.images.length > 0) {
+      setImagePreview(product.images.map(img => img.imgUrl));
+    } else if (product.imageUrl) {
+      setImagePreview([product.imageUrl.startsWith('http') 
+        ? product.imageUrl 
+        : `${process.env.REACT_APP_BACKEND_URL}${product.imageUrl}`]);
+    }
+    
     setShowForm(true);
   };
 
@@ -146,6 +178,25 @@ const AdminProducts = () => {
   const handleCancel = () => {
     setShowForm(false);
     resetForm();
+  };
+
+  // Handle adding a new size
+  const handleAddSize = () => {
+    setSizes([...sizes, { size: '', stock: '0' }]);
+  };
+
+  // Handle removing a size
+  const handleRemoveSize = (index) => {
+    const newSizes = [...sizes];
+    newSizes.splice(index, 1);
+    setSizes(newSizes);
+  };
+
+  // Handle size change
+  const handleSizeChange = (index, field, value) => {
+    const newSizes = [...sizes];
+    newSizes[index][field] = value;
+    setSizes(newSizes);
   };
 
   // Submit form to create or update a product
@@ -162,7 +213,14 @@ const AdminProducts = () => {
       data.append('price', sanitizeInput(formData.price));
       data.append('category', sanitizeInput(formData.category));
       data.append('tshirtType', sanitizeInput(formData.tshirtType));
-      if (imageFile) data.append('image', imageFile);
+      
+      // Add sizes and stock to the form data
+      sizes.forEach((sizeItem, index) => {
+        data.append('sizes[]', sanitizeInput(sizeItem.size));
+        data.append('stock[]', sanitizeInput(sizeItem.stock));
+      });
+      
+      imageFile.forEach(file => data.append('images', file));
 
       let response;
       if (editingProduct) {
@@ -375,26 +433,62 @@ const AdminProducts = () => {
               </div>
               
               <div>
-                <label className="block text-sm font-medium mb-1">Ürün Görseli</label>
+                <label className="block text-sm font-medium mb-1">Ürün Görselleri</label>
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={handleImageChange}
+                  multiple
+                  onChange={handleImagesChange}
                   className="w-full border border-gray-300 rounded-md px-3 py-2"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  {editingProduct && !imageFile ? "Resim değiştirmezseniz mevcut resim kullanılacaktır." : ""}
+                  {editingProduct && imageFile.length === 0 ? "Görseller değiştirmezseniz mevcut görseller kullanılacaktır." : ""}
                 </p>
               </div>
               
-              <div className="flex items-center justify-center">
-                {imagePreview && (
-                  <img 
-                    src={imagePreview} 
-                    alt="Ürün önizleme" 
-                    className="max-h-40 max-w-full object-contain border rounded"
-                  />
-                )}
+              {/* Size and Stock Management */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium mb-1">Beden ve Stok Yönetimi</label>
+                <div className="size-management">
+                  {sizes.map((sizeItem, index) => (
+                    <div key={index} className="size-item">
+                      <div className="size-inputs">
+                        <input
+                          type="text"
+                          placeholder="Beden (S, M, L, XL...)"
+                          value={sizeItem.size}
+                          onChange={(e) => handleSizeChange(index, 'size', e.target.value)}
+                          className="size-input"
+                          required
+                        />
+                        <input
+                          type="number"
+                          placeholder="Stok"
+                          value={sizeItem.stock}
+                          onChange={(e) => handleSizeChange(index, 'stock', e.target.value)}
+                          className="stock-input"
+                          min="0"
+                          required
+                        />
+                      </div>
+                      <button 
+                        type="button" 
+                        onClick={() => handleRemoveSize(index)}
+                        className="remove-size-btn"
+                        disabled={sizes.length <= 1}
+                      >
+                        <FaTimes />
+                      </button>
+                    </div>
+                  ))}
+                  <button 
+                    type="button" 
+                    onClick={handleAddSize}
+                    className="add-size-btn"
+                  >
+                    <FaPlus className="mr-2" /> Beden Ekle
+                  </button>
+                </div>
               </div>
             </div>
             
@@ -438,6 +532,7 @@ const AdminProducts = () => {
                 <th className="border px-4 py-2 text-left">Kategori</th>
                 <th className="border px-4 py-2 text-left">Tip</th>
                 <th className="border px-4 py-2 text-left">Fiyat</th>
+                <th className="border px-4 py-2 text-left">Bedenler</th>
                 <th className="border px-4 py-2 text-center">İşlemler</th>
               </tr>
             </thead>
@@ -445,13 +540,22 @@ const AdminProducts = () => {
               {products.map((product) => (
                 <tr key={product._id} className="hover:bg-gray-50">
                   <td className="border px-4 py-2">
-                    <img 
-                      src={product.imageUrl.startsWith('http') 
-                        ? product.imageUrl 
-                        : `${process.env.REACT_APP_BACKEND_URL}${product.imageUrl}`} 
-                      alt={product.name} 
-                      className="w-16 h-16 object-cover"
-                    />
+                    {product.images && product.images.length > 0 ? (
+                      <img 
+                        src={product.images[0].imgUrl} 
+                        alt={product.name || 'Ürün'} 
+                        className="w-16 h-16 object-cover"
+                      />
+                    ) : (
+                      <img 
+                        src={product.imageUrl && product.imageUrl.startsWith('http') 
+                            ? product.imageUrl 
+                            : `${process.env.REACT_APP_BACKEND_URL}${product.imageUrl || ''}`
+                        } 
+                        alt={product.name || 'Ürün'} 
+                        className="w-16 h-16 object-cover"
+                      />
+                    )}
                   </td>
                   <td className="border px-4 py-2">{product.name}</td>
                   <td className="border px-4 py-2">{product.category}</td>
@@ -459,6 +563,19 @@ const AdminProducts = () => {
                     {product.tshirtType === 'duz' ? 'Düz' : 'Baskılı'}
                   </td>
                   <td className="border px-4 py-2">{product.price} TL</td>
+                  <td className="border px-4 py-2">
+                    <div className="size-badges">
+                      {Array.isArray(product.tshirtSize) && product.tshirtSize.length > 0 ? (
+                        product.tshirtSize.map((sizeItem, index) => (
+                          <span key={index} className="size-badge">
+                            {sizeItem.size}: {sizeItem.stock}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-gray-400">Beden bilgisi yok</span>
+                      )}
+                    </div>
+                  </td>
                   <td className="border px-4 py-2">
                     {confirmDelete === product._id ? (
                       <div className="flex justify-center space-x-2">
