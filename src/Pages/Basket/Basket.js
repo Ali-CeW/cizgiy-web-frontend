@@ -13,16 +13,40 @@ const Basket = () => {
       return [];
     }
   });
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     localStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
+
+  // Show notification message
+  const showNotification = (message, type = 'info') => {
+    setNotification({ message, type });
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000);
+  };
 
   const updateQuantity = (id, change) => {
     setCartItems(prevItems =>
       prevItems.map(item => {
         if (item.id === id) {
           const newQuantity = Math.max(1, item.quantity + change);
+          
+          // Check if the product is baskili type (printed) - using the correct property
+          const isBaskili = item.productType === 'baskili';
+          
+          // Enforce minimum quantity for printed products
+          if (isBaskili && newQuantity < 5) {
+            return { ...item, quantity: 5 };
+          }
+          
+          // Check if new quantity exceeds available stock
+          if (item.availableStock && newQuantity > item.availableStock) {
+            showNotification(`Bu ürün için maksimum ${item.availableStock} adet ekleyebilirsiniz.`, 'warning');
+            return { ...item, quantity: item.availableStock };
+          }
+          
           return { ...item, quantity: newQuantity };
         }
         return item;
@@ -37,15 +61,24 @@ const Basket = () => {
   const totalItems = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
+  // Update the needsMinimumQuantity function to use the correct property
   const needsMinimumQuantity = (item) => {
-    return item.type.includes('Baskılı') && item.quantity < 5;
+    return item.productType === 'baskili' && item.quantity < 5;
   };
 
   const handleCheckout = () => {
     const invalidItems = cartItems.filter(item => needsMinimumQuantity(item));
+    const overStockItems = cartItems.filter(item => 
+      item.availableStock && item.quantity > item.availableStock
+    );
 
     if (invalidItems.length > 0) {
       alert('Baskılı ürünlerde minimum 5 adet sipariş vermelisiniz.');
+      return;
+    }
+
+    if (overStockItems.length > 0) {
+      alert('Sepetinizdeki bazı ürünler için stok sınırını aştınız.');
       return;
     }
 
@@ -55,6 +88,16 @@ const Basket = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Notification */}
+      {notification && (
+        <div className={`fixed top-4 right-4 z-50 p-4 rounded-md shadow-md ${
+          notification.type === 'error' ? 'bg-red-500' : 
+          notification.type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500'
+        } text-white`}>
+          {notification.message}
+        </div>
+      )}
+      
       <h1 className="text-3xl font-bold mb-8 text-gray-800">Sepetim</h1>
       {cartItems.length === 0 ? (
         <div className="text-center py-16">
@@ -94,6 +137,7 @@ const Basket = () => {
                       <button 
                         onClick={() => updateQuantity(item.id, -1)}
                         className="bg-gray-200 px-2 py-1 rounded"
+                        disabled={(item.productType === 'baskili' && item.quantity <= 5) || item.quantity <= 1}
                       >
                         <FaMinus className="text-gray-600" />
                       </button>
@@ -101,6 +145,7 @@ const Basket = () => {
                       <button 
                         onClick={() => updateQuantity(item.id, 1)}
                         className="bg-gray-200 px-2 py-1 rounded"
+                        disabled={item.availableStock && item.quantity >= item.availableStock}
                       >
                         <FaPlus className="text-gray-600" />
                       </button>
@@ -108,6 +153,11 @@ const Basket = () => {
                     {needsMinimumQuantity(item) && (
                       <p className="text-red-500 text-sm">
                         Baskılı ürünlerde minimum 5 adet sipariş verilebilir.
+                      </p>
+                    )}
+                    {item.availableStock && (
+                      <p className="text-blue-500 text-sm">
+                        Bu beden için maksimum {item.availableStock} adet ekleyebilirsiniz.
                       </p>
                     )}
                     <p className="text-lg font-bold text-gray-800">

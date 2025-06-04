@@ -126,6 +126,13 @@ const Products = () => {
     setOrderPanelOpen(true);
   };
 
+  // Add a helper function to get available stock for selected size
+  const getAvailableStock = () => {
+    if (!selectedProduct || !selectedSize) return 0;
+    const sizeInfo = selectedProduct.tshirtSize?.find(item => item.size === selectedSize);
+    return sizeInfo ? parseInt(sizeInfo.stock) : 0;
+  };
+
   // Handle quantity change
   const handleQuantityChange = (newQuantity) => {
     // Ensure minimum quantity for printed t-shirts
@@ -135,6 +142,15 @@ const Products = () => {
     
     // Prevent negative quantities
     if (newQuantity < 1) newQuantity = 1;
+    
+    // Check available stock for selected size
+    const availableStock = getAvailableStock();
+    
+    // Limit quantity to available stock
+    if (availableStock > 0 && newQuantity > availableStock) {
+      showNotification(`En fazla ${availableStock} adet ekleyebilirsiniz (stok sınırı)`, 'warning');
+      newQuantity = availableStock;
+    }
     
     setQuantity(newQuantity);
   };
@@ -184,13 +200,19 @@ const Products = () => {
       showNotification('Baskılı ürünlerde minimum sipariş adedi 5\'tir', 'error');
       return;
     }
+    
+    // Check available stock for selected size
+    const availableStock = getAvailableStock();
+    if (quantity > availableStock) {
+      showNotification(`Seçilen beden (${selectedSize}) için yeterli stok yok. Maksimum ${availableStock} adet ekleyebilirsiniz`, 'error');
+      return;
+    }
 
     const sanitizedProduct = {
       ...selectedProduct,
       name: sanitizeInput(selectedProduct.name),
       type: sanitizeInput(selectedProduct.type),
     };
-
     const cartItem = {
       id: `${sanitizedProduct._id}_${Date.now()}`,
       productId: sanitizedProduct._id,
@@ -198,12 +220,14 @@ const Products = () => {
       type: sanitizedProduct.category,
       productType: sanitizedProduct.tshirtType,
       size: selectedSize,
+      availableStock: getAvailableStock(),
       price: parseFloat(sanitizedProduct.price),
       quantity: quantity,
       image: sanitizedProduct.imageUrl || (sanitizedProduct.images && sanitizedProduct.images.length > 0 ? sanitizedProduct.images[0].imgUrl : ''),
       customImage: customImagePreview,
       totalPrice: parseFloat(sanitizedProduct.price) * quantity,
     };
+    
     
     setCart(prevCart => [...prevCart, cartItem]);
     setAddedToCart(true);
@@ -440,12 +464,12 @@ const Products = () => {
                               className={`size-option ${selectedSize === sizeItem.size ? 'selected' : ''} ${!isSizeInStock(sizeItem) ? 'out-of-stock' : ''}`}
                               onClick={() => isSizeInStock(sizeItem) && handleSizeSelect(sizeItem.size)}
                               disabled={!isSizeInStock(sizeItem)}
-                              title={!isSizeInStock(sizeItem) ? 'Stokta yok' : `${sizeItem.size} - Stok: ${sizeItem.stock}`}
+                              title={!isSizeInStock(sizeItem) ? 'Stokta yok' : `${sizeItem.size} - Stok: var`} 
                             >
                               <span className="size-label">{sizeItem.size}</span>
                               <span className="stock-indicator">
                                 {isSizeInStock(sizeItem) ? (
-                                  <span className="stock-count">{sizeItem.stock}</span>
+                                  <span className="stock-count">Var</span>
                                 ) : (
                                   <span className="out-of-stock-indicator">×</span>
                                 )}
@@ -461,7 +485,16 @@ const Products = () => {
                               <span className="font-medium">Seçilen Beden: </span> 
                               {selectedSize} - Stok: 
                               <span className="stock-number">
-                                {selectedProduct.tshirtSize.find(item => item.size === selectedSize)?.stock || 0}
+                                {(() => {
+                                  const stock = selectedProduct.tshirtSize.find(item => item.size === selectedSize)?.stock || 0;
+                                  if (stock > 3) {
+                                    return 'Var';
+                                  } else if (stock > 0) {
+                                    return 'Son Stoklar';
+                                  } else {
+                                    return 'Yok';
+                                  }
+                                })()}
                               </span>
                             </p>
                           </div>
@@ -469,32 +502,39 @@ const Products = () => {
                       </div>
                     )}
                     
-                    {/* Quantity selector */}
                     <div className="mb-6">
                       <p className="text-sm font-medium mb-2">Adet:</p>
                       <div className="flex items-center">
                         <button
                           onClick={() => handleQuantityChange(quantity - 1)}
                           className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-10 w-10 rounded-l-lg flex items-center justify-center"
+                          disabled={quantity <= 1}
                         >
                           <FaMinus />
                         </button>
                         <input
                           type="number"
                           min={selectedProduct.tshirtType === 'baskili' ? 5 : 1}
+                          max={getAvailableStock() || 99}
                           value={quantity}
                           onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
                           className="h-10 w-16 border-t border-b text-center"
                         />
                         <button
                           onClick={() => handleQuantityChange(quantity + 1)}
-                          className="bg-gray-200 hover:bg-gray-300 text-gray-800 h-10 w-10 rounded-r-lg flex items-center justify-center"
+                          className={`bg-gray-200 hover:bg-gray-300 text-gray-800 h-10 w-10 rounded-r-lg flex items-center justify-center ${
+                            quantity >= getAvailableStock() ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          disabled={quantity >= getAvailableStock()}
                         >
                           <FaPlus />
                         </button>
                       </div>
                       {selectedProduct.tshirtType === 'baskili' && (
                         <p className="text-xs text-red-500 mt-1">* Baskılı tişörtlerimizde sipariş sayısı minimum 5'tir</p>
+                      )}
+                      {selectedSize && (
+                        <p className="text-xs text-blue-500 mt-1">* Bu beden için maksimum {getAvailableStock()} adet ekleyebilirsiniz fazlası için iletişime geçin !</p>
                       )}
                     </div>
                     

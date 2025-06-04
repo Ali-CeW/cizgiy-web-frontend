@@ -13,8 +13,8 @@ const AdminProducts = () => {
   const [error, setError] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState('');
+  const [imageFile, setImageFile] = useState([]); // Initialize as array, not null
+  const [imagePreview, setImagePreview] = useState([]); // Initialize as array, not string
   const [notification, setNotification] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   
@@ -27,7 +27,7 @@ const AdminProducts = () => {
     tshirtType: 'duz'
   });
 
-  // Add state for sizes and stock
+  // Initialize sizes as an array, not a string
   const [sizes, setSizes] = useState([{ size: 'S', stock: '0' }]);
 
   // Authentication check
@@ -61,7 +61,7 @@ const AdminProducts = () => {
           }
         }
       );
-      
+      console.log('Fetched products:', response.data);
       setProducts(response.data);
       setLoading(false);
     } catch (err) {
@@ -98,12 +98,12 @@ const AdminProducts = () => {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
-      setImageFile(file);
+      setImageFile([file]); // Set as array
       
       // Create preview
       const reader = new FileReader();
       reader.onloadend = () => {
-        setImagePreview(reader.result);
+        setImagePreview([reader.result]); // Set as array
       };
       reader.readAsDataURL(file);
     }
@@ -150,25 +150,34 @@ const AdminProducts = () => {
   // Open form for editing an existing product
   const handleEdit = (product) => {
     setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-      tshirtType: product.tshirtType
+      name: product.name || '',
+      description: product.description || '',
+      price: product.price || '',
+      category: product.category || 'Tişört',
+      tshirtType: product.tshirtType || 'duz'
     });
     
-    // Set sizes if available, otherwise use default
-    setSizes(Array.isArray(product.tshirtSize) ? product.tshirtSize : [{ size: 'S', stock: '0' }]);
+    // Set sizes correctly from tshirtSize
+    setSizes(Array.isArray(product.tshirtSize) && product.tshirtSize.length > 0 
+      ? product.tshirtSize.map(item => ({ 
+          size: item.size || '',
+          stock: item.stock || '0',
+          _id: item._id // Preserve the _id for updates
+        }))
+      : [{ size: 'S', stock: '0' }]
+    );
     
     setEditingProduct(product._id);
     
-    // Handle images preview
-    if (product.images && product.images.length > 0) {
+    // Handle images preview safely
+    if (Array.isArray(product.images) && product.images.length > 0) {
       setImagePreview(product.images.map(img => img.imgUrl));
     } else if (product.imageUrl) {
       setImagePreview([product.imageUrl.startsWith('http') 
         ? product.imageUrl 
         : `${process.env.REACT_APP_BACKEND_URL}${product.imageUrl}`]);
+    } else {
+      setImagePreview([]);
     }
     
     setShowForm(true);
@@ -182,21 +191,34 @@ const AdminProducts = () => {
 
   // Handle adding a new size
   const handleAddSize = () => {
-    setSizes([...sizes, { size: '', stock: '0' }]);
+    setSizes(prevSizes => 
+      Array.isArray(prevSizes) ? [...prevSizes, { size: '', stock: '0' }] : [{ size: '', stock: '0' }]
+    );
   };
 
   // Handle removing a size
   const handleRemoveSize = (index) => {
-    const newSizes = [...sizes];
-    newSizes.splice(index, 1);
-    setSizes(newSizes);
+    setSizes(prevSizes => {
+      if (!Array.isArray(prevSizes)) return [{ size: 'S', stock: '0' }];
+      const newSizes = [...prevSizes];
+      newSizes.splice(index, 1);
+      return newSizes.length > 0 ? newSizes : [{ size: 'S', stock: '0' }];
+    });
   };
 
   // Handle size change
   const handleSizeChange = (index, field, value) => {
-    const newSizes = [...sizes];
-    newSizes[index][field] = value;
-    setSizes(newSizes);
+    setSizes(prevSizes => {
+      if (!Array.isArray(prevSizes)) return [{ size: 'S', stock: '0' }];
+      const newSizes = [...prevSizes];
+      if (newSizes[index]) {
+        newSizes[index] = {
+          ...newSizes[index],
+          [field]: value
+        };
+      }
+      return newSizes;
+    });
   };
 
   // Submit form to create or update a product
@@ -208,19 +230,29 @@ const AdminProducts = () => {
       if (!token) throw new Error('Unauthorized access.');
 
       const data = new FormData();
-      data.append('name', sanitizeInput(formData.name));
-      data.append('description', sanitizeInput(formData.description));
-      data.append('price', sanitizeInput(formData.price));
-      data.append('category', sanitizeInput(formData.category));
-      data.append('tshirtType', sanitizeInput(formData.tshirtType));
+      data.append('name', sanitizeInput(formData.name || ''));
+      data.append('description', sanitizeInput(formData.description || ''));
+      data.append('price', sanitizeInput(formData.price || ''));
+      data.append('category', sanitizeInput(formData.category || 'Tişört'));
+      data.append('tshirtType', sanitizeInput(formData.tshirtType || 'duz'));
       
-      // Add sizes and stock to the form data
-      sizes.forEach((sizeItem, index) => {
-        data.append('sizes[]', sanitizeInput(sizeItem.size));
-        data.append('stock[]', sanitizeInput(sizeItem.stock));
-      });
+      // Add sizes and stock to the form data with safety checks
+      if (Array.isArray(sizes)) {
+        sizes.forEach((sizeItem, index) => {
+          data.append('sizes[]', sanitizeInput(sizeItem.size || ''));
+          data.append('stock[]', sanitizeInput(sizeItem.stock || '0'));
+          if (sizeItem._id) {
+            data.append('sizeIds[]', sizeItem._id);
+          }
+        });
+      }
       
-      imageFile.forEach(file => data.append('images', file));
+      // Handle imageFile safely
+      if (Array.isArray(imageFile) && imageFile.length > 0) {
+        imageFile.forEach(file => file && data.append('images', file));
+      } else if (imageFile) {
+        data.append('images', imageFile);
+      }
 
       let response;
       if (editingProduct) {
@@ -442,7 +474,7 @@ const AdminProducts = () => {
                   className="w-full border border-gray-300 rounded-md px-3 py-2"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  {editingProduct && imageFile.length === 0 ? "Görseller değiştirmezseniz mevcut görseller kullanılacaktır." : ""}
+                  {editingProduct && (!imageFile || imageFile.length === 0) ? "Görseller değiştirmezseniz mevcut görseller kullanılacaktır." : ""}
                 </p>
               </div>
               
@@ -450,7 +482,7 @@ const AdminProducts = () => {
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium mb-1">Beden ve Stok Yönetimi</label>
                 <div className="size-management">
-                  {sizes.map((sizeItem, index) => (
+                  {Array.isArray(sizes) && sizes.map((sizeItem, index) => (
                     <div key={index} className="size-item">
                       <div className="size-inputs">
                         <input
